@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgis/postgis:16-3.5
+    container_name: geoapi_db_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: geoapi
+      POSTGRES_USER: geoapi
+      POSTGRES_PASSWORD: geoapi
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoapi -d geoapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    image: geoapi_api_dev:latest
+    container_name: geoapi_api_dev
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./:/workspace:delegated
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  notebook:
+    image: python:3.12-slim
+    container_name: geoapi_notebook_dev
+    command: >
+      bash -c "
+        pip install --no-cache-dir jupyterlab requests pandas geopandas mapboxgl shapely &&
+        jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --NotebookApp.token=''
+      "
+    volumes:
+      - ./:/workspace:delegated
+    working_dir: /workspace
+    ports:
+      - "8888:8888"
+    depends_on:
+      - api
+
+volumes:
+  db_data:

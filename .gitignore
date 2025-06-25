@@ -1,0 +1,27 @@
+# Backup files #
+*.bak
+.$*
+
+# Python #
+*.py[cod]
+*$py.class
+__pycache__
+.pytest_cache/
+
+# Visual Studio Code #
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
+# Jupyter Notebook #
+.ipynb_checkpoints
+
+# Ignore local environment files #
+.env
+.env.*
+.secrets
+
+tmp/
