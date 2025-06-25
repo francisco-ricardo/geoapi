@@ -21,7 +21,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/Dockerfile.dev
     image: geoapi_api_dev:latest
     container_name: geoapi_api_dev
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

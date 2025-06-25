@@ -1,12 +1,20 @@
-# Backup files #
+# Backup files
 *.bak
 .$*
 
-# Python #
+# Python
+__pycache__/
 *.py[cod]
 *$py.class
-__pycache__
 .pytest_cache/
+*.pyo
+*.pyd
+*.pdb
+
+# Logs
+*.log
+logs/
+log/
 
 # Visual Studio Code #
 .vscode/
@@ -18,10 +26,24 @@ __pycache__
 
 # Jupyter Notebook #
 .ipynb_checkpoints
+*.ipynb~
 
 # Ignore local environment files #
 .env
 .env.*
 .secrets
 
+# Tmp and build
 tmp/
+build/
+dist/
+*.egg-info/
+.cache/
+.mypy_cache/
+coverage/
+htmlcov/
+site/
+
+# Ignore test reports
+junit-*.xml
+coverage.xml
