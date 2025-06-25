@@ -1,7 +1,7 @@
 -r requirements.txt
-pytest
-pytest-cov
-black
-isort
-mypy
-httpx
+pytest==8.4.1
+pytest-cov==6.2.1
+black==25.1.0
+isort==6.0.1
+mypy==1.16.1
+httpx==0.28.1
