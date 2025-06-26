@@ -2,8 +2,7 @@
 Database configuration and session management.
 """
 from sqlalchemy import create_engine, MetaData, text, Engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from typing import Generator, Optional
 from functools import lru_cache
 
@@ -18,6 +17,29 @@ _engine: Optional[Engine] = None
 _session_factory: Optional[sessionmaker] = None
 
 
+def _validate_database_url(database_url: str) -> None:
+    """
+    Validate database URL format.
+    
+    Args:
+        database_url: Database connection URL to validate
+        
+    Raises:
+        ValueError: If database URL format is invalid
+    """
+    url_lower = database_url.lower()
+    
+    if not any(url_lower.startswith(scheme) for scheme in ["sqlite", "postgresql", "mysql"]):
+        raise ValueError(
+            f"Unsupported database URL scheme. "
+            f"Expected sqlite, postgresql, or mysql. Got: {database_url[:20]}..."
+        )
+    
+    if url_lower.startswith("postgresql") and "postgis" not in database_url.lower():
+        # Warning: PostgreSQL without PostGIS might not support spatial operations
+        pass
+
+
 @lru_cache()
 def get_engine() -> Engine:
     """
@@ -27,18 +49,40 @@ def get_engine() -> Engine:
     
     Returns:
         Engine: SQLAlchemy database engine with PostGIS support
+        
+    Raises:
+        ValueError: If database URL is invalid
     """
     global _engine
     if _engine is None:
         settings = get_settings()
+        
+        # Validate database URL
+        _validate_database_url(settings.database_url)
+        
+        # Configure connect_args based on database type
+        connect_args = {}
+        database_url = settings.database_url.lower()
+        
+        if database_url.startswith("sqlite"):
+            # SQLite specific configuration
+            connect_args = {
+                "check_same_thread": False,  # Allow FastAPI to use SQLite
+                "timeout": 30  # Connection timeout in seconds
+            }
+        elif database_url.startswith("postgresql"):
+            # PostgreSQL specific configuration
+            connect_args = {
+                "connect_timeout": 10,  # Connection timeout
+                "application_name": "geoapi"  # For monitoring/debugging
+            }
+        
         _engine = create_engine(
             settings.database_url,
             echo=settings.debug,  # Log SQL queries when debug=True
             pool_pre_ping=True,   # Verify connections before use
-            pool_recycle=300,     # Recycle connections every 5 minutes
-            connect_args={
-                "options": "-c timezone=UTC"  # Set timezone to UTC
-            }
+            pool_recycle=3600,    # Recycle connections every hour (was 300s)
+            connect_args=connect_args
         )
     return _engine
 
@@ -93,24 +137,36 @@ def create_tables() -> None:
     
     This function creates all tables defined by SQLAlchemy models
     that inherit from Base. It also ensures PostGIS extensions
-    are available.
+    are available for PostgreSQL databases.
     
     Raises:
-        RuntimeError: If PostGIS extension is not available
+        RuntimeError: If PostGIS extension is not available for PostgreSQL
     """
     engine = get_engine()
+    settings = get_settings()
     
-    # Verify PostGIS is available
-    with engine.connect() as conn:
-        result = conn.execute(
-            text("SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'postgis')")
-        )
-        postgis_exists = result.scalar()
-        
-        if not postgis_exists:
-            raise RuntimeError(
-                "PostGIS extension not found. Please ensure PostGIS is installed and enabled."
-            )
+    # Only check PostGIS for PostgreSQL databases
+    database_url = settings.database_url.lower()
+    if database_url.startswith("postgresql"):
+        # Verify PostGIS is available
+        try:
+            with engine.connect() as conn:
+                result = conn.execute(
+                    text("SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'postgis')")
+                )
+                postgis_exists = result.scalar()
+                
+                if not postgis_exists:
+                    raise RuntimeError(
+                        "PostGIS extension not found. "
+                        "Please ensure PostGIS is installed and enabled: "
+                        "CREATE EXTENSION IF NOT EXISTS postgis;"
+                    )
+        except Exception as e:
+            if "postgis" in str(e).lower():
+                raise RuntimeError(f"PostGIS verification failed: {e}")
+            # Re-raise other database connection errors
+            raise
     
     # Create all tables
     Base.metadata.create_all(bind=engine)

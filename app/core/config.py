@@ -56,10 +56,7 @@ class Settings(BaseSettings):
         }
     )
     
-    class Config:
-        env_file = ".env"
-        env_prefix = "GEOAPI_"
-        case_sensitive = False
+    model_config = {"env_file": ".env", "env_prefix": "GEOAPI_", "case_sensitive": False}
 
 
 @lru_cache()
