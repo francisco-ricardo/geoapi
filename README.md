@@ -1,52 +1,101 @@
-# GeoAPI - API Geoespacial para Avaliação Técnica
+# GeoSpatial Links API
 
-Uma API REST geoespacial construída com **FastAPI**, **SQLAlchemy**, **PostgreSQL/PostGIS**, **Pandas**, e **Parquet** para análise e visualização de dados de tráfego urbano.
+A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQL/PostGIS**, and **Pydantic** for traffic data analysis and visualization.
 
-## 🚀 Tecnologias
+## 🚀 Quick Start (For Interviewers)
+
+### Option 1: Automated Setup (Recommended)
+```bash
+# Clone the repository
+git clone <repository-url>
+cd geospatial-links-api
+
+# Run automated setup (handles everything)
+python scripts/setup/complete_setup.py
+
+# Or use Make commands
+make setup
+```
+
+### Option 2: Manual Setup
+```bash
+# Start containers
+docker compose -f docker-compose-dev.yml up -d
+
+# Check status
+make logs
+```
+
+### Access Points
+- **API Server**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs  
+- **Health Check**: http://localhost:8000/health
+
+## � Technologies
 
 - **Backend**: FastAPI, SQLAlchemy 2.0, Pydantic v2
-- **Banco de Dados**: PostgreSQL + PostGIS (produção), SQLite (desenvolvimento/testes)
-- **Análise de Dados**: Pandas, Parquet
-- **Geoespacial**: GeoAlchemy2, PostGIS, Mapbox
-- **Testes**: pytest, TDD
-- **DevOps**: Docker, DevContainer
+- **Database**: PostgreSQL + PostGIS (with automatic table creation)
+- **Geospatial**: GeoAlchemy2, PostGIS, GeoJSON
+- **Testing**: pytest, TDD approach
+- **DevOps**: Docker, DevContainer, automated setup
 
-## 📋 Estrutura do Projeto
+## � Project Structure
 
 ```
 app/
 ├── core/
-│   ├── config.py          # Configuração com Pydantic Settings
-│   └── database.py        # Factory para engine/session (SQLite/PostgreSQL)
+│   ├── config.py          # Configuration with Pydantic Settings
+│   └── database.py        # Engine/session factory (SQLite/PostgreSQL)
 ├── models/
-│   ├── link.py           # Modelo de links viários (com geometry)
-│   └── speed_record.py   # Modelo de registros de velocidade
-├── api/v1/               # Endpoints da API (a implementar)
-├── schemas/              # Schemas Pydantic (a implementar)
-└── services/             # Lógica de negócio (a implementar)
+│   ├── link.py           # Road links model (with PostGIS geometry)
+│   └── speed_record.py   # Speed measurements model
+├── schemas/
+│   ├── link.py           # Pydantic schemas for links
+│   └── speed_record.py   # Pydantic schemas for speed records
+├── api/v1/
+│   └── links.py          # API endpoints implementation
+└── services/             # Business logic layer
+
+scripts/
+├── setup/
+│   └── complete_setup.py # Automated project setup
+├── database/
+│   └── create_tables.py  # Database initialization
+├── demo/
+│   ├── schemas_basic.py  # Basic schema demonstration
+│   └── schemas_complete.py # Complete schema guide
+└── testing/
+    ├── run_tests.py      # Test runner
+    ├── run_tests_by_category.py # Category-based tests
+    └── test_endpoints.py # API endpoint testing
 
 tests/
-├── conftest.py                    # Fixtures compartilhadas
-├── test_config.py                 # Testes de configuração
-├── test_database.py               # Testes do database factory
-├── simplified_models.py           # Modelos simplificados (sem PostGIS)
-├── test_simplified_models.py      # Testes dos modelos simplificados
-└── test_models/
-    ├── test_link.py              # Testes do modelo Link
-    └── test_speed_record.py      # Testes do modelo SpeedRecord
-
-run_tests.py                       # Script inteligente para execução de testes
+├── conftest.py           # Shared test fixtures
+├── test_*.py            # Unit tests
+└── test_models/         # Model-specific tests
 ```
 
-## 🧪 Sistema de Testes
+## 🧪 Testing System
 
-O projeto possui um **sistema de testes híbrido** que suporta tanto desenvolvimento local (SQLite) quanto ambiente de produção (PostgreSQL/PostGIS):
+The project features a **comprehensive testing system** with multiple categories:
 
-### Executar Testes (Desenvolvimento Local)
-
+### Run Tests
 ```bash
-# Executa apenas testes compatíveis com SQLite (recomendado para TDD)
-python run_tests.py --sqlite
+# All tests
+make test
+
+# By category
+python scripts/testing/run_tests_by_category.py basic    # No database required
+python scripts/testing/run_tests_by_category.py schema   # Pydantic validation
+python scripts/testing/run_tests_by_category.py database # PostgreSQL required
+python scripts/testing/run_tests_by_category.py all      # Complete suite
+```
+
+### API Testing
+```bash
+# Test endpoints manually
+python scripts/testing/test_endpoints.py
+```
 
 # Mostra ajuda detalhada sobre os testes
 python run_tests.py --help-tests

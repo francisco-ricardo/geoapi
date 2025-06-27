@@ -24,7 +24,16 @@ services:
       dockerfile: ./docker/Dockerfile.dev
     image: geoapi_api_dev:latest
     container_name: geoapi_api_dev
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      bash -c "
+        echo 'Waiting for database to be ready...' &&
+        until pg_isready -h db -p 5432 -U geoapi -d geoapi; do
+          echo 'Database not ready, waiting...';
+          sleep 2;
+        done &&
+        echo 'Database is ready, starting API...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
     volumes:
       - ./:/workspace:delegated
     env_file:
@@ -34,6 +43,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   notebook:
     image: python:3.12-slim
