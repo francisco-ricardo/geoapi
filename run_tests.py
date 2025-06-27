@@ -14,6 +14,9 @@ def run_sqlite_tests():
         # Configuração
         "tests/test_config.py",
         
+        # Schemas Pydantic
+        "tests/test_schemas_link.py",
+        
         # Modelos simplificados (sem PostGIS)
         "tests/test_simplified_models.py",
         
