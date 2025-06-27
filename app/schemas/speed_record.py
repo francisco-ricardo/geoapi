@@ -35,9 +35,26 @@ class SpeedRecordCreate(SpeedRecordBase):
     )
 
 
-class SpeedRecordUpdate(SpeedRecordBase):
+class SpeedRecordUpdate(BaseModel):
     """Schema for updating an existing SpeedRecord."""
-    pass
+    
+    timestamp: Optional[datetime] = Field(
+        default=None,
+        description="Timestamp of the speed measurement",
+        examples=["2024-01-15T14:30:00Z"]
+    )
+    speed_kph: Optional[float] = Field(
+        default=None,
+        ge=0,
+        le=300,
+        description="Speed in kilometers per hour",
+        examples=[45.5]
+    )
+    period: Optional[str] = Field(
+        default=None,
+        description="Time period classification",
+        examples=["morning", "afternoon", "evening", "night"]
+    )
 
 
 class SpeedRecord(SpeedRecordBase):
