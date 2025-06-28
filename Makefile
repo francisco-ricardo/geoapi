@@ -104,6 +104,10 @@ analyze-data:
 	@echo "Analyzing original Parquet datasets..."
 	@docker exec $(API_CONTAINER) python scripts/data/analyze_data.py
 
+validate-ingestion:
+	@echo "Validating data ingestion integrity..."
+	@docker exec $(API_CONTAINER) python scripts/data/validate_ingestion.py
+
 verify-db:
 	@echo "Verifying database state..."
 	@docker exec $(API_CONTAINER) python scripts/database/verify_database.py

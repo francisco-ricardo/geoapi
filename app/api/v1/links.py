@@ -16,6 +16,100 @@ from app.schemas.link import LinkCreate, LinkResponse, LinkUpdate, LinkList
 router = APIRouter()
 
 
+@router.get("/links/", response_model=List[LinkResponse])
+async def get_links(
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db)
+) -> List[LinkResponse]:
+    """
+    Get a list of links.
+    
+    Args:
+        limit: Maximum number of links to return (default: 100)
+        offset: Number of links to skip (default: 0)
+        db: Database session
+        
+    Returns:
+        List[LinkResponse]: List of links
+    """
+    links = db.query(Link).offset(offset).limit(limit).all()
+    
+    response_links = []
+    for link in links:
+        # Convert geometry to GeoJSON dict
+        geometry_dict = None
+        if link.geometry is not None:
+            try:
+                # Get GeoJSON string from PostGIS
+                geojson_str = db.scalar(ST_AsGeoJSON(link.geometry))
+                if geojson_str:
+                    geometry_dict = json.loads(geojson_str)
+            except Exception:
+                geometry_dict = None
+        
+        response_data = {
+            "link_id": link.link_id,
+            "road_name": link.road_name,
+            "length": link.length,
+            "road_type": link.road_type,
+            "speed_limit": link.speed_limit,
+            "geometry": geometry_dict,
+            "speed_records_count": len(link.speed_records) if hasattr(link, 'speed_records') else 0
+        }
+        response_links.append(LinkResponse(**response_data))
+    
+    return response_links
+
+
+@router.get("/links/{link_id}", response_model=LinkResponse)
+async def get_link(
+    link_id: int,
+    db: Session = Depends(get_db)
+) -> LinkResponse:
+    """
+    Get a specific link by ID.
+    
+    Args:
+        link_id: ID of the link to retrieve
+        db: Database session
+        
+    Returns:
+        LinkResponse: Link data
+        
+    Raises:
+        HTTPException: If link not found
+    """
+    link = db.query(Link).filter(Link.link_id == link_id).first()
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Link with ID {link_id} not found"
+        )
+    
+    # Convert geometry to GeoJSON dict
+    geometry_dict = None
+    if link.geometry is not None:
+        try:
+            geojson_str = db.scalar(ST_AsGeoJSON(link.geometry))
+            if geojson_str:
+                geometry_dict = json.loads(geojson_str)
+        except Exception:
+            geometry_dict = None
+    
+    response_data = {
+        "link_id": link.link_id,
+        "road_name": link.road_name,
+        "length": link.length,
+        "road_type": link.road_type,
+        "speed_limit": link.speed_limit,
+        "geometry": geometry_dict,
+        "speed_records_count": len(link.speed_records) if hasattr(link, 'speed_records') else 0
+    }
+    
+    return LinkResponse(**response_data)
+
+
 @router.post("/links/", response_model=LinkResponse, status_code=status.HTTP_201_CREATED)
 async def create_link(
     link: LinkCreate,

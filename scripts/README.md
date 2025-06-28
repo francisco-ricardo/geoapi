@@ -9,7 +9,8 @@ scripts/
 ├── data/
 │   ├── analyze_data.py          # Analyze original Parquet datasets
 │   ├── explore_datasets.py     # Dataset exploration utilities
-│   └── ingest_datasets.py      # Main data ingestion script
+│   ├── ingest_datasets.py      # Main data ingestion script
+│   └── validate_ingestion.py   # Validate Parquet ↔ Database integrity
 ├── database/
 │   ├── create_tables.py         # Database setup and table creation
 │   ├── postgis_queries.sql     # PostGIS spatial query examples
@@ -52,6 +53,17 @@ scripts/
   - Bulk inserts with SQLAlchemy ORM
   - Data validation and integrity checks
 - **Usage**: `python scripts/data/ingest_datasets.py`
+
+#### `validate_ingestion.py`
+- **Purpose**: Validate data integrity between Parquet files and database
+- **Features**:
+  - Compares sample records field-by-field
+  - Validates geometry conversion accuracy
+  - Checks statistical consistency
+  - Verifies referential integrity
+  - Provides detailed validation reports
+- **Usage**: `python scripts/data/validate_ingestion.py`
+- **When to use**: After data ingestion to ensure data quality
 
 ### Database Scripts (`scripts/database/`)
 
@@ -162,8 +174,17 @@ scripts/
 
 ### For Development Setup
 1. **Database Setup**: `python scripts/database/create_tables.py`
-2. **Verify Schemas**: `python scripts/demo/schemas_basic.py`
-3. **Run Basic Tests**: `python scripts/testing/run_tests_by_category.py basic`
+2. **Data Ingestion**: `python scripts/data/ingest_datasets.py`
+3. **Validate Ingestion**: `python scripts/data/validate_ingestion.py`
+4. **Verify Schemas**: `python scripts/demo/schemas_basic.py`
+5. **Run Basic Tests**: `python scripts/testing/run_tests_by_category.py basic`
+
+### For Data Quality Assurance
+1. **Analyze Source Data**: `python scripts/data/analyze_data.py`
+2. **Ingest Data**: `python scripts/data/ingest_datasets.py`
+3. **Validate Integrity**: `python scripts/data/validate_ingestion.py`
+4. **Verify Database**: `python scripts/database/verify_database.py`
+5. **Check PostGIS**: `python scripts/database/verify_postgis.py`
 
 ### For Learning/Understanding
 1. **Schema Basics**: `python scripts/demo/schemas_basic.py`

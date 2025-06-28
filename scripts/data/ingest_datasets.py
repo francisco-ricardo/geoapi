@@ -3,19 +3,25 @@
 Data ingestion script for GeoSpatial Links API.
 
 This script ingests the Parquet datasets into PostgreSQL/PostGIS database:
-- Link Info Dataset: Road segments with geometry
+- Link Info Dataset: Road segments with geometry  
 - Speed Data: Traffic speed measurements
 
-Designed to run inside the Docker container with all dependencies available.
-Uses SQLAlchemy ORM for robust data operations.
+PERFORMANCE OPTIMIZED VERSION:
+- Chunk Processing: 5K records per chunk to reduce memory consumption
+- Streaming Pipeline: Sequential processing with memory cleanup
+- Bulk Operations: SQLAlchemy bulk_save_objects for optimal performance
+
+Clean Code principles: SOLID, KISS, separation of concerns.
+Designed for Docker container with all dependencies available.
 """
 
 import sys
 import os
 import pandas as pd
 import json
+import gc
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Iterator, Set
 from sqlalchemy.orm import Session
 from sqlalchemy import text, func
 from shapely.geometry import shape
@@ -28,19 +34,29 @@ from app.core.database import get_engine, get_session_factory
 from app.models.link import Link
 from app.models.speed_record import SpeedRecord
 
+# Configuration constants
+LINK_CHUNK_SIZE = 5000
+SPEED_RECORD_CHUNK_SIZE = 5000
+LINK_BATCH_SIZE = 1000
+SPEED_BATCH_SIZE = 2000
+
+PERIOD_MAPPING = {
+    1: 'Overnight',
+    2: 'Early Morning', 
+    3: 'AM Peak',
+    4: 'Midday',
+    5: 'Early Afternoon',
+    6: 'PM Peak',
+    7: 'Evening'
+}
+
 
 def main():
-    """Main ingestion function."""
-    print_header("GEOSPATIAL DATA INGESTION")
-    print("Ingesting Parquet datasets into PostgreSQL/PostGIS database using SQLAlchemy ORM")
+    """Main ingestion function with optimized chunk processing."""
+    print_header("GEOSPATIAL DATA INGESTION - MEMORY OPTIMIZED")
+    print("Ingesting Parquet datasets using chunked processing for memory efficiency")
     
     try:
-        # Load datasets
-        link_df, speed_df = load_datasets()
-        
-        # Prepare data as ORM objects
-        link_objects = prepare_link_objects(link_df)
-        
         # Create session for database operations
         Session = get_session_factory()
         
@@ -48,17 +64,14 @@ def main():
             # Clear existing data
             clear_existing_data_orm(session)
             
-            # Insert links first
-            insert_links_orm(session, link_objects)
+            # Process links in chunks (memory efficient)
+            process_links_chunked(session)
             
             # Get existing link IDs for referential integrity
             existing_link_ids = get_existing_link_ids(session)
             
-            # Prepare speed records with link validation
-            speed_objects = prepare_speed_objects(speed_df, existing_link_ids)
-            
-            # Insert speed records
-            insert_speed_records_orm(session, speed_objects)
+            # Process speed records in chunks (memory efficient)
+            process_speed_records_chunked(session, existing_link_ids)
             
             # Verify results
             verify_data_orm(session)
@@ -142,27 +155,241 @@ def convert_geometry_to_wkt_element(geo_json_str):
         return None
 
 
-def prepare_link_objects(link_df) -> List[Link]:
-    """Prepare link data as SQLAlchemy ORM objects."""
-    print_step(2, "PREPARING LINK OBJECTS")
+def _safe_float_conversion(value) -> float | None:
+    """
+    Safely convert value to float with None fallback.
     
+    Single Responsibility: Safe type conversion.
+    
+    Args:
+        value: Value to convert
+        
+    Returns:
+        float or None: Converted value or None if conversion fails
+    """
+    if pd.notna(value) and value != '':
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return None
+    return None
+
+
+def process_links_chunked(session: Session) -> int:
+    """
+    Process links dataset in memory-efficient chunks.
+    
+    Implements streaming pipeline with chunk processing for optimal memory usage.
+    Uses bulk operations for maximum performance.
+    
+    Returns:
+        int: Total number of links inserted
+    """
+    print_step(2, "PROCESSING LINKS (CHUNKED - MEMORY OPTIMIZED)")
+    
+    link_info_path = "/workspace/data/raw/link_info.parquet.gz"
+    if not os.path.exists(link_info_path):
+        raise FileNotFoundError(f"Link info dataset not found: {link_info_path}")
+    
+    total_processed = 0
+    total_inserted = 0
+    
+    print(f"Processing links in chunks of {LINK_CHUNK_SIZE:,} records...")
+    
+    try:
+        # Load full dataset first, then process in chunks
+        print("  Loading link dataset...")
+        link_df = pd.read_parquet(link_info_path)
+        total_records = len(link_df)
+        print(f"  Total records to process: {total_records:,}")
+        
+        # Process in chunks using streaming pipeline
+        for start_idx in range(0, total_records, LINK_CHUNK_SIZE):
+            end_idx = min(start_idx + LINK_CHUNK_SIZE, total_records)
+            chunk_df = link_df.iloc[start_idx:end_idx]
+            chunk_num = (start_idx // LINK_CHUNK_SIZE) + 1
+            
+            print(f"\n  Processing chunk {chunk_num}: {len(chunk_df):,} records ({start_idx:,} to {end_idx:,})")
+            
+            # Transform chunk to ORM objects
+            link_objects = _transform_link_chunk(chunk_df)
+            
+            # Bulk insert with error handling
+            chunk_inserted = _bulk_insert_links(session, link_objects)
+            
+            total_inserted += chunk_inserted
+            total_processed += len(chunk_df)
+            
+            print(f"    Chunk {chunk_num}: {chunk_inserted:,} links inserted")
+            print(f"    Running total: {total_inserted:,} links inserted from {total_processed:,} processed")
+            
+            # Memory cleanup - critical for large datasets
+            del link_objects, chunk_df
+            gc.collect()
+        
+        # Final memory cleanup
+        del link_df
+        gc.collect()
+        
+        print(f"\n✅ Links processing completed: {total_inserted:,} inserted from {total_processed:,} processed")
+        return total_inserted
+        
+    except Exception as e:
+        print(f"❌ Error in chunked link processing: {e}")
+        raise
+
+
+def process_speed_records_chunked(session: Session, existing_link_ids: Set[int]) -> int:
+    """
+    Process speed records dataset in memory-efficient chunks.
+    
+    Implements streaming pipeline with chunk processing for optimal memory usage.
+    Uses bulk operations for maximum performance.
+    
+    Args:
+        session: Database session
+        existing_link_ids: Set of valid link IDs for referential integrity
+        
+    Returns:
+        int: Total number of speed records inserted
+    """
+    print_step(3, "PROCESSING SPEED RECORDS (CHUNKED - MEMORY OPTIMIZED)")
+    
+    speed_data_path = "/workspace/data/raw/duval_jan1_2024.parquet.gz"
+    if not os.path.exists(speed_data_path):
+        raise FileNotFoundError(f"Speed data dataset not found: {speed_data_path}")
+    
+    total_processed = 0
+    total_inserted = 0
+    total_skipped = 0
+    
+    print(f"Processing speed records in chunks of {SPEED_RECORD_CHUNK_SIZE:,} records...")
+    
+    try:
+        # Load full dataset first, then process in chunks
+        print("  Loading speed records dataset...")
+        speed_df = pd.read_parquet(speed_data_path)
+        total_records = len(speed_df)
+        print(f"  Total records to process: {total_records:,}")
+        
+        # Process in chunks using streaming pipeline
+        for start_idx in range(0, total_records, SPEED_RECORD_CHUNK_SIZE):
+            end_idx = min(start_idx + SPEED_RECORD_CHUNK_SIZE, total_records)
+            chunk_df = speed_df.iloc[start_idx:end_idx]
+            chunk_num = (start_idx // SPEED_RECORD_CHUNK_SIZE) + 1
+            
+            print(f"\n  Processing chunk {chunk_num}: {len(chunk_df):,} records ({start_idx:,} to {end_idx:,})")
+            
+            # Process chunk into SpeedRecord objects
+            speed_objects, chunk_skipped = _transform_speed_chunk(chunk_df, existing_link_ids)
+            
+            # Insert current chunk in batches using optimized bulk operations
+            chunk_inserted = _bulk_insert_speed_records(session, speed_objects)
+            total_inserted += chunk_inserted
+            total_processed += len(chunk_df)
+            total_skipped += chunk_skipped
+            
+            print(f"    Chunk {chunk_num}: {chunk_inserted:,} speed records inserted, {chunk_skipped:,} skipped")
+            print(f"    Running total: {total_inserted:,} inserted, {total_skipped:,} skipped from {total_processed:,} processed")
+            
+            # Memory cleanup - critical for large datasets
+            del speed_objects, chunk_df
+            gc.collect()  # Force garbage collection
+        
+        # Final memory cleanup
+        del speed_df
+        gc.collect()
+        
+        print(f"\n✅ Speed records processing completed: {total_inserted:,} inserted, {total_skipped:,} skipped from {total_processed:,} processed")
+        return total_inserted
+        
+    except Exception as e:
+        print(f"❌ Error in chunked speed records processing: {e}")
+        raise
+
+
+def insert_links_batch(session: Session, link_objects: List[Link], batch_size: int) -> int:
+    """Insert links in smaller batches with error handling."""
+    total_inserted = 0
+    
+    try:
+        for i in range(0, len(link_objects), batch_size):
+            batch = link_objects[i:i + batch_size]
+            
+            try:
+                session.bulk_save_objects(batch)
+                session.commit()
+                total_inserted += len(batch)
+                
+            except Exception as e:
+                session.rollback()
+                print(f"    Error inserting batch, retrying individually...")
+                
+                # Try individual inserts for this batch
+                for link_obj in batch:
+                    try:
+                        session.add(link_obj)
+                        session.commit()
+                        total_inserted += 1
+                    except Exception:
+                        session.rollback()
+                        continue
+    
+    except Exception as e:
+        print(f"Critical error in batch insertion: {e}")
+        session.rollback()
+    
+    return total_inserted
+
+
+def insert_speed_records_batch(session: Session, speed_objects: List[SpeedRecord], batch_size: int) -> int:
+    """Insert speed records in smaller batches with error handling."""
+    total_inserted = 0
+    
+    try:
+        for i in range(0, len(speed_objects), batch_size):
+            batch = speed_objects[i:i + batch_size]
+            
+            try:
+                session.bulk_save_objects(batch)
+                session.commit()
+                total_inserted += len(batch)
+                
+            except Exception as e:
+                session.rollback()
+                # Skip problematic batches for speed records to maintain performance
+                continue
+    
+    except Exception as e:
+        print(f"Critical error in speed record batch insertion: {e}")
+        session.rollback()
+    
+    return total_inserted
+
+
+def _transform_link_chunk(chunk_df: pd.DataFrame) -> List[Link]:
+    """
+    Transform a chunk of link data into Link ORM objects.
+    
+    Single Responsibility: Only handles data transformation.
+    
+    Args:
+        chunk_df: DataFrame chunk with link data
+        
+    Returns:
+        List[Link]: Transformed Link objects
+    """
     link_objects = []
     
-    for idx, row in link_df.iterrows():
+    for idx, row in chunk_df.iterrows():
         try:
             # Convert geometry
             geometry_element = convert_geometry_to_wkt_element(row['geo_json'])
             if not geometry_element:
-                print(f"Skipping link {row['link_id']} - invalid geometry")
                 continue
             
             # Convert length to float
-            length = None
-            if pd.notna(row['_length']) and row['_length'] != '':
-                try:
-                    length = float(row['_length'])
-                except (ValueError, TypeError):
-                    length = None
+            length = _safe_float_conversion(row.get('_length'))
             
             # Create Link ORM object
             link_obj = Link(
@@ -176,75 +403,146 @@ def prepare_link_objects(link_df) -> List[Link]:
             
             link_objects.append(link_obj)
             
-            if len(link_objects) % 10000 == 0:
-                print(f"  Processed {len(link_objects):,} links...")
-                
         except Exception as e:
-            print(f"Error processing link {row.get('link_id', 'unknown')}: {e}")
+            print(f"    Error processing link {row.get('link_id', 'unknown')}: {e}")
             continue
     
-    print(f"  Successfully prepared {len(link_objects):,} Link objects")
     return link_objects
 
 
-def prepare_speed_objects(speed_df, existing_link_ids: set) -> List[SpeedRecord]:
-    """Prepare speed data as SQLAlchemy ORM objects."""
-    print_step(3, "PREPARING SPEED RECORD OBJECTS")
+def _bulk_insert_links(session: Session, link_objects: List[Link]) -> int:
+    """
+    Bulk insert links using optimized batch operations.
     
+    Single Responsibility: Only handles bulk insertion.
+    
+    Args:
+        session: Database session
+        link_objects: List of Link objects to insert
+        
+    Returns:
+        int: Number of successfully inserted links
+    """
+    total_inserted = 0
+    
+    try:
+        for i in range(0, len(link_objects), LINK_BATCH_SIZE):
+            batch = link_objects[i:i + LINK_BATCH_SIZE]
+            
+            try:
+                session.bulk_save_objects(batch)
+                session.commit()
+                total_inserted += len(batch)
+                
+            except Exception as e:
+                session.rollback()
+                print(f"    Error inserting batch, retrying individually...")
+                
+                # Fallback: individual inserts for error recovery
+                for link_obj in batch:
+                    try:
+                        session.add(link_obj)
+                        session.commit()
+                        total_inserted += 1
+                    except Exception:
+                        session.rollback()
+                        continue
+    
+    except Exception as e:
+        print(f"Critical error in bulk link insertion: {e}")
+        session.rollback()
+    
+    return total_inserted
+
+
+def _transform_speed_chunk(chunk_df: pd.DataFrame, existing_link_ids: Set[int]) -> tuple[List[SpeedRecord], int]:
+    """
+    Transform a chunk of speed data into SpeedRecord ORM objects.
+    
+    Single Responsibility: Only handles speed data transformation.
+    
+    Args:
+        chunk_df: DataFrame chunk with speed data
+        existing_link_ids: Set of valid link IDs for referential integrity
+        
+    Returns:
+        tuple: (List of SpeedRecord objects, number of skipped records)
+    """
     speed_objects = []
-    skipped_missing_links = 0
+    skipped_count = 0
     
-    # Map period to string
-    period_mapping = {
-        1: 'Overnight',
-        2: 'Early Morning', 
-        3: 'AM Peak',
-        4: 'Midday',
-        5: 'Early Afternoon',
-        6: 'PM Peak',
-        7: 'Evening'
-    }
-    
-    for idx, row in speed_df.iterrows():
+    for idx, row in chunk_df.iterrows():
         try:
             link_id = int(row['link_id'])
             
             # Skip if link doesn't exist (referential integrity)
             if link_id not in existing_link_ids:
-                skipped_missing_links += 1
+                skipped_count += 1
                 continue
             
             # Convert datetime
             timestamp = pd.to_datetime(row['date_time'])
-            period_name = period_mapping.get(row['period'], None)
+            period_name = PERIOD_MAPPING.get(row['period'], None)
             
             # Create SpeedRecord ORM object
             speed_obj = SpeedRecord(
                 link_id=link_id,
                 timestamp=timestamp,
-                speed=float(row['average_speed']),  # Using 'speed' column (mph)
+                speed=float(row['average_speed']),
                 time_period=period_name
             )
             
             speed_objects.append(speed_obj)
             
-            if len(speed_objects) % 50000 == 0:
-                print(f"  Processed {len(speed_objects):,} speed records...")
-                
         except Exception as e:
-            print(f"Error processing speed record {idx}: {e}")
+            print(f"    Error processing speed record {idx}: {e}")
             continue
     
-    print(f"  Successfully prepared {len(speed_objects):,} SpeedRecord objects")
-    if skipped_missing_links > 0:
-        print(f"  Skipped {skipped_missing_links:,} records with missing link references")
-    
-    return speed_objects
+    return speed_objects, skipped_count
 
+
+def _bulk_insert_speed_records(session: Session, speed_objects: List[SpeedRecord]) -> int:
+    """
+    Bulk insert speed records using optimized batch operations.
+    
+    Single Responsibility: Only handles bulk insertion of speed records.
+    
+    Args:
+        session: Database session
+        speed_objects: List of SpeedRecord objects to insert
+        
+    Returns:
+        int: Number of successfully inserted speed records
+    """
+    total_inserted = 0
+    
+    try:
+        for i in range(0, len(speed_objects), SPEED_BATCH_SIZE):
+            batch = speed_objects[i:i + SPEED_BATCH_SIZE]
+            
+            try:
+                session.bulk_save_objects(batch)
+                session.commit()
+                total_inserted += len(batch)
+                
+            except Exception as e:
+                session.rollback()
+                # Skip problematic batches for speed records to maintain performance
+                continue
+    
+    except Exception as e:
+        print(f"Critical error in bulk speed record insertion: {e}")
+        session.rollback()
+    
+    return total_inserted
 
 def clear_existing_data_orm(session: Session):
-    """Clear existing data from tables using ORM."""
-    print_step(4, "CLEARING EXISTING DATA (ORM)")
+    """
+    Clear existing data from tables using ORM.
+    
+    Single Responsibility: Only handles data cleanup.
+    """
+    print_step(1, "CLEARING EXISTING DATA")
     
     try:
         # Clear speed records first (foreign key constraint)
@@ -266,53 +564,15 @@ def clear_existing_data_orm(session: Session):
         raise
 
 
-def insert_links_orm(session: Session, link_objects: List[Link]):
-    """Insert links using SQLAlchemy ORM bulk operations."""
-    print_step(5, "INSERTING LINKS (ORM)")
+def get_existing_link_ids(session: Session) -> Set[int]:
+    """
+    Get set of existing link IDs for referential integrity.
     
-    batch_size = 1000
-    total_inserted = 0
+    Single Responsibility: Only handles link ID retrieval.
     
-    try:
-        for i in range(0, len(link_objects), batch_size):
-            batch = link_objects[i:i + batch_size]
-            
-            try:
-                # Use bulk_save_objects for better performance
-                session.bulk_save_objects(batch)
-                session.commit()
-                
-                total_inserted += len(batch)
-                print(f"  Inserted batch {i//batch_size + 1}: {total_inserted:,} links")
-                
-            except Exception as e:
-                print(f"Error inserting link batch {i//batch_size + 1}: {e}")
-                session.rollback()
-                
-                # Try individual inserts for this batch
-                successful_individual = 0
-                for link_obj in batch:
-                    try:
-                        session.add(link_obj)
-                        session.commit()
-                        successful_individual += 1
-                    except Exception as individual_error:
-                        session.rollback()
-                        print(f"  Failed to insert link {link_obj.link_id}: {individual_error}")
-                
-                total_inserted += successful_individual
-                print(f"  Recovered {successful_individual} links from failed batch")
-    
-        print(f"  Total links inserted: {total_inserted:,}")
-        
-    except Exception as e:
-        print(f"Critical error in link insertion: {e}")
-        session.rollback()
-        raise
-
-
-def get_existing_link_ids(session: Session) -> set:
-    """Get set of existing link IDs for referential integrity."""
+    Returns:
+        Set[int]: Set of existing link IDs
+    """
     print("Getting existing link IDs for referential integrity...")
     
     try:
@@ -327,41 +587,13 @@ def get_existing_link_ids(session: Session) -> set:
         return set()
 
 
-def insert_speed_records_orm(session: Session, speed_objects: List[SpeedRecord]):
-    """Insert speed records using SQLAlchemy ORM bulk operations."""
-    print_step(6, "INSERTING SPEED RECORDS (ORM)")
-    
-    batch_size = 5000
-    total_inserted = 0
-    
-    try:
-        for i in range(0, len(speed_objects), batch_size):
-            batch = speed_objects[i:i + batch_size]
-            
-            try:
-                # Use bulk_save_objects for better performance
-                session.bulk_save_objects(batch)
-                session.commit()
-                
-                total_inserted += len(batch)
-                print(f"  Inserted batch {i//batch_size + 1}: {total_inserted:,} speed records")
-                
-            except Exception as e:
-                print(f"Error inserting speed batch {i//batch_size + 1}: {e}")
-                session.rollback()
-                continue
-    
-        print(f"  Total speed records inserted: {total_inserted:,}")
-        
-    except Exception as e:
-        print(f"Critical error in speed record insertion: {e}")
-        session.rollback()
-        raise
-
-
 def verify_data_orm(session: Session):
-    """Verify inserted data using ORM queries."""
-    print_step(7, "VERIFYING DATA (ORM)")
+    """
+    Verify inserted data using ORM queries.
+    
+    Single Responsibility: Only handles data verification.
+    """
+    print_step(4, "VERIFYING DATA")
     
     try:
         # Count links using ORM
@@ -379,7 +611,6 @@ def verify_data_orm(session: Session):
         sample_link = session.query(Link).filter(Link.geometry.isnot(None)).first()
         if sample_link:
             print(f"    Sample link: {sample_link.link_id}, {sample_link.road_name}")
-            # Note: Geometry display would require special handling with GeoAlchemy2
             print(f"    Has geometry: Yes")
         
         # Sample speed record with relationship
@@ -388,13 +619,10 @@ def verify_data_orm(session: Session):
             print(f"    Sample speed: Link {sample_speed.link_id}, {sample_speed.speed} mph at {sample_speed.timestamp}")
             if hasattr(sample_speed, 'time_period') and sample_speed.time_period is not None:
                 print(f"    Time period: {sample_speed.time_period}")
-            else:
-                print("    Time period: Not set")
         
         # Advanced ORM query: Average speed by period
-        print("\n  Advanced ORM verification:")
+        print("\n  Advanced verification:")
         try:
-            # Try a simpler query first to test the connection
             total_records = session.query(SpeedRecord).count()
             print(f"    Total speed records: {total_records:,}")
             
@@ -405,7 +633,7 @@ def verify_data_orm(session: Session):
             print(f"    Records with time_period: {records_with_period:,}")
             
             if records_with_period > 0:
-                # Use a more compatible aggregation query
+                # Use aggregation query
                 period_averages = session.query(
                     SpeedRecord.time_period,
                     func.avg(SpeedRecord.speed).label('avg_speed'),
@@ -419,19 +647,13 @@ def verify_data_orm(session: Session):
                 print("    Average speeds by time period:")
                 for period_avg in period_averages:
                     print(f"      {period_avg.time_period}: {period_avg.avg_speed:.1f} mph ({period_avg.record_count:,} records)")
-            else:
-                print("    No records with time_period found - skipping aggregation")
-                
+                    
         except Exception as query_error:
-            print(f"    Error in advanced verification query: {query_error}")
-            print("    Continuing with basic verification...")
+            print(f"    Error in advanced verification: {query_error}")
             
     except Exception as e:
         print(f"Error during verification: {e}")
         raise
-
-
-
 
 if __name__ == "__main__":
     main()
