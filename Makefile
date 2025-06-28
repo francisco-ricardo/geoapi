@@ -1,7 +1,7 @@
 # GeoSpatial Links API - Development Makefile
 # Commands for development using Docker containers from host
 
-.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-api health-check clean-db
+.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-api health-check clean-db analyze-data verify-db verify-postgis
 
 # Container names from docker-compose-dev.yml
 API_CONTAINER = geoapi_api_dev
@@ -98,6 +98,19 @@ health-check:
 clean-db:
 	@echo "Cleaning database..."
 	@docker exec $(API_CONTAINER) python -c "from app.core.database import Base, get_engine; Base.metadata.drop_all(bind=get_engine()); print('All tables dropped')"
+
+# Data analysis and verification commands
+analyze-data:
+	@echo "Analyzing original Parquet datasets..."
+	@docker exec $(API_CONTAINER) python scripts/data/analyze_data.py
+
+verify-db:
+	@echo "Verifying database state..."
+	@docker exec $(API_CONTAINER) python scripts/database/verify_database.py
+
+verify-postgis:
+	@echo "Verifying PostGIS spatial data..."
+	@docker exec $(API_CONTAINER) python scripts/database/verify_postgis.py
 
 # Open shell in API container
 shell:

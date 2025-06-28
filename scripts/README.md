@@ -6,11 +6,20 @@ This document describes the purpose and organization of utility scripts in the p
 
 ```
 scripts/
+├── data/
+│   ├── analyze_data.py          # Analyze original Parquet datasets
+│   ├── explore_datasets.py     # Dataset exploration utilities
+│   └── ingest_datasets.py      # Main data ingestion script
 ├── database/
-│   └── create_tables.py         # Database setup and table creation
+│   ├── create_tables.py         # Database setup and table creation
+│   ├── postgis_queries.sql     # PostGIS spatial query examples
+│   ├── verify_database.py      # Database state verification
+│   └── verify_postgis.py       # PostGIS-specific verification
 ├── demo/
 │   ├── schemas_basic.py         # Basic schema demonstration
-│   └── schemas_complete.py      # Complete schema guide and examples
+│   └── schemas_complete.py     # Complete schema guide and examples
+├── setup/
+│   └── complete_setup.py       # Complete project setup
 └── testing/
     ├── run_tests.py             # Simple test runner (all tests)
     ├── run_tests_by_category.py # Category-based test runner
@@ -19,7 +28,66 @@ scripts/
 
 ## Script Descriptions
 
+### Data Scripts (`scripts/data/`)
+
+#### `analyze_data.py`
+- **Purpose**: Analyze original Parquet datasets before ingestion
+- **Features**:
+  - Examines link_info.parquet.gz structure and content
+  - Analyzes speed data patterns and statistics
+  - Validates GeoJSON geometry format
+  - Checks data compatibility between datasets
+- **Usage**: `python scripts/data/analyze_data.py`
+- **When to use**: Before data ingestion, debugging data issues
+
+#### `explore_datasets.py`
+- **Purpose**: Interactive dataset exploration utilities
+- **Features**: Basic exploration functions and utilities
+
+#### `ingest_datasets.py`
+- **Purpose**: Main data ingestion script for Parquet → PostgreSQL
+- **Features**:
+  - Loads and processes Parquet files
+  - Converts GeoJSON to PostGIS geometry
+  - Bulk inserts with SQLAlchemy ORM
+  - Data validation and integrity checks
+- **Usage**: `python scripts/data/ingest_datasets.py`
+
 ### Database Scripts (`scripts/database/`)
+
+#### `create_tables.py`
+- **Purpose**: Creates all database tables defined in SQLAlchemy models
+- **Features**:
+  - Connects to PostgreSQL/PostGIS database
+  - Creates tables for Link and SpeedRecord models
+  - Verifies table creation and structure
+  - Provides detailed logging and error handling
+- **Usage**: `python scripts/database/create_tables.py`
+- **Requirements**: PostgreSQL/PostGIS database connection configured
+
+#### `verify_database.py`
+- **Purpose**: Verify database state after data ingestion
+- **Features**:
+  - Checks record counts and data integrity
+  - Validates relationships between tables
+  - Tests basic geometry functionality
+  - Provides data quality metrics
+- **Usage**: `python scripts/database/verify_database.py`
+- **When to use**: After data ingestion, for health checks
+
+#### `verify_postgis.py`
+- **Purpose**: Comprehensive PostGIS spatial data verification
+- **Features**:
+  - Advanced spatial queries and analysis
+  - Geometry format demonstrations (WKT, GeoJSON)
+  - PostGIS function examples
+  - Detailed spatial statistics
+- **Usage**: `python scripts/database/verify_postgis.py`
+- **When to use**: For spatial data validation and examples
+
+#### `postgis_queries.sql`
+- **Purpose**: Collection of useful PostGIS SQL queries
+- **Features**: Ready-to-use spatial queries for manual database inspection
 
 #### `create_tables.py`
 - **Purpose**: Creates all database tables defined in SQLAlchemy models
