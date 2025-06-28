@@ -4,26 +4,37 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 
 ## 🚀 Quick Start (For Interviewers)
 
-### Option 1: Automated Setup (Recommended)
+### Prerequisites
+- Docker and Docker Compose installed on your host machine
+- Clone this repository
+
+### Setup and Run
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd geospatial-links-api
+# 1. Start the containers (database + API)
+make start
 
-# Run automated setup (handles everything)
-python scripts/setup/complete_setup.py
-
-# Or use Make commands
+# 2. Complete setup (tables + data ingestion)
 make setup
+
+# 3. Access the API
+# - API Server: http://localhost:8000
+# - API Documentation: http://localhost:8000/docs
+# - Health Check: http://localhost:8000/health
 ```
 
-### Option 2: Manual Setup
+### Alternative Commands
 ```bash
-# Start containers
-docker compose -f docker-compose-dev.yml up -d
+# Step by step setup
+make start              # Start containers
+make create-tables      # Create database tables
+make ingest-data        # Load Parquet datasets
 
-# Check status
-make logs
+# Development commands
+make logs              # View container logs
+make shell             # Open shell in API container
+make db-shell          # Open PostgreSQL shell
+make test              # Run tests
+make health-check      # Check system health
 ```
 
 ### Access Points
