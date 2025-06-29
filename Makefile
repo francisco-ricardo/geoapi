@@ -1,7 +1,7 @@
 # GeoSpatial Links API - Development Makefile
 # Commands for development using Docker containers from host
 
-.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-all test-unit test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-models test-schemas test-core test-middleware test-database test-logging clean-pycache
+.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-all test-unit test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-models test-schemas test-core test-middleware test-database test-logging clean-pycache format format-check type-check type-check-strict sort-imports sort-imports-check quality-check
 
 # Container names from docker-compose-dev.yml
 API_CONTAINER = geoapi_api_dev
@@ -32,6 +32,13 @@ help:
 	@echo "  test-middleware - Run middleware tests only"
 	@echo "  test-database   - Run database tests only"
 	@echo "  test-logging    - Run logging system tests"
+	@echo "  format          - Format code with Black"
+	@echo "  format-check    - Check code formatting"
+	@echo "  type-check      - Run mypy type checking"
+	@echo "  type-check-strict - Run strict type checking"
+	@echo "  sort-imports    - Sort imports with isort"
+	@echo "  sort-imports-check - Check import sorting"
+	@echo "  quality-check   - Run all quality checks"
 	@echo "  health-check- Check database and API health"
 	@echo "  clean-db    - Clean database (drop all tables)"
 	@echo "  clean-pycache - Clean Python cache files"
@@ -195,8 +202,42 @@ test-logging: clean-pycache
 	@echo "Running logging system tests..."
 	@docker exec $(API_CONTAINER) python -m pytest tests/unit/core/test_logging.py -v
 
-# Clean Python cache
-clean-pycache:
-	find . -type d -name '__pycache__' -exec rm -rf {} +
-	find . -type f -name '*.pyc' -delete
-	rm -rf .pytest_cache .mypy_cache .pylint.d
+# ==============================================================================
+# CODE QUALITY COMMANDS
+# ==============================================================================
+
+# Code formatting with Black
+format:
+	@echo "Formatting code with Black..."
+	@docker exec $(API_CONTAINER) python -m black app/ tests/ scripts/ --line-length 88
+
+format-check:
+	@echo "Checking code formatting..."
+	@docker exec $(API_CONTAINER) python -m black app/ tests/ scripts/ --check --line-length 88
+
+# Type checking with mypy
+type-check:
+	@echo "Running mypy type checking..."
+	@docker exec $(API_CONTAINER) python -m mypy app/ --ignore-missing-imports
+
+type-check-strict:
+	@echo "Running strict mypy type checking..."
+	@docker exec $(API_CONTAINER) python -m mypy app/ --strict --ignore-missing-imports
+
+# Import sorting with isort
+sort-imports:
+	@echo "Sorting imports with isort..."
+	@docker exec $(API_CONTAINER) python -m isort app/ tests/ scripts/ --profile black
+
+sort-imports-check:
+	@echo "Checking import sorting..."
+	@docker exec $(API_CONTAINER) python -m isort app/ tests/ scripts/ --check-only --profile black
+
+# Combined quality check
+quality-check: format-check type-check sort-imports-check
+	@echo "All quality checks passed! ✅"
+
+# Install quality tools (if not already installed)
+install-quality-tools:
+	@echo "Installing quality tools..."
+	@docker exec $(API_CONTAINER) pip install black mypy isort
