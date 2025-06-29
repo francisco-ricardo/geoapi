@@ -20,8 +20,7 @@ import os
 import pandas as pd
 import json
 import gc
-from datetime import datetime
-from typing import List, Dict, Any, Iterator, Set
+from typing import List, Set
 from sqlalchemy.orm import Session
 from sqlalchemy import text, func
 from shapely.geometry import shape
@@ -30,7 +29,7 @@ from geoalchemy2 import WKTElement
 # Add project root to Python path
 sys.path.insert(0, '/workspace')
 
-from app.core.database import get_engine, get_session_factory
+from app.core.database import get_session_factory
 from app.models.link import Link
 from app.models.speed_record import SpeedRecord
 
