@@ -10,6 +10,40 @@ Provides options to run different test suites:
 import subprocess
 import sys
 import argparse
+import os
+import shutil
+
+
+def clean_pycache():
+    """Clean Python cache files to avoid import conflicts."""
+    print("Cleaning Python cache files...")
+    
+    # Base workspace directory
+    workspace_dir = "/workspace"
+    
+    # Remove all __pycache__ directories
+    for root, dirs, files in os.walk(workspace_dir):
+        if "__pycache__" in dirs:
+            pycache_dir = os.path.join(root, "__pycache__")
+            print(f"Removing {pycache_dir}")
+            shutil.rmtree(pycache_dir, ignore_errors=True)
+    
+    # Remove .pyc files
+    for root, dirs, files in os.walk(workspace_dir):
+        for file in files:
+            if file.endswith(".pyc"):
+                pyc_file = os.path.join(root, file)
+                print(f"Removing {pyc_file}")
+                os.remove(pyc_file)
+    
+    # Remove pytest cache
+    pytest_cache = os.path.join(workspace_dir, ".pytest_cache")
+    if os.path.exists(pytest_cache):
+        print(f"Removing {pytest_cache}")
+        shutil.rmtree(pytest_cache, ignore_errors=True)
+    
+    print("Python cache cleaning completed!")
+    print("-" * 50)
 
 
 def run_sqlite_tests():
@@ -33,6 +67,9 @@ def run_sqlite_tests():
     print("Running SQLite-compatible tests...")
     print("=" * 50)
     
+    # Clean Python cache before running tests
+    clean_pycache()
+    
     cmd = [
         "python", "-m", "pytest", 
         "-v", 
@@ -53,6 +90,9 @@ def run_full_tests():
     
     print("Running ALL tests (requires PostgreSQL/PostGIS)...")
     print("\nWARNING: This will fail if PostgreSQL/PostGIS is not configured!")
+    
+    # Clean Python cache before running tests
+    clean_pycache()
     
     cmd = [
         "python", "-m", "pytest", 
@@ -93,6 +133,11 @@ def show_test_help():
     print()
     print("--help-tests:")
     print("  Shows this help message")
+    print()
+    print("Features:")
+    print("  - Automatic Python cache cleaning before tests")
+    print("  - Test coverage reporting")
+    print("  - SQLite mode for quick testing without PostgreSQL")
     print()
     print("Examples:")
     print("  python scripts/testing/run_tests.py --sqlite")

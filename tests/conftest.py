@@ -59,11 +59,20 @@ def test_db_simple(test_settings):
     reset_database_state()
     
     from app.core.database import get_engine, get_session_factory
-    from tests.simplified_models import TestBase
+    from tests._models.simplified_models import ModelBase
+    from sqlalchemy import event
     
     # Create engine and tables for simplified models
     engine = get_engine()
-    TestBase.metadata.create_all(bind=engine)
+    
+    # Enable foreign key constraints in SQLite
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+    
+    ModelBase.metadata.create_all(bind=engine)
     
     # Create session
     session_factory = get_session_factory()
@@ -73,20 +82,28 @@ def test_db_simple(test_settings):
     
     # Cleanup
     session.close()
-    TestBase.metadata.drop_all(bind=engine)
+    ModelBase.metadata.drop_all(bind=engine)
     reset_database_state()
 
 
 @pytest.fixture(scope="function")
 def test_db(test_settings):
-    """Create test database session (skip PostGIS for SQLite)."""
+    """Create test database session with actual models tables."""
     # Reset database state to use test settings
     reset_database_state()
     
-    from app.core.database import get_engine, get_session_factory
+    from app.core.database import get_engine, get_session_factory, Base
     
-    # Create engine - skip table creation to avoid PostGIS issues with SQLite
+    # Create engine and tables for actual models
     engine = get_engine()
+    
+    # Patch GeoAlchemy2 functions for SQLite
+    with patch('geoalchemy2.functions.GenericFunction.__init__', return_value=None):
+        with patch('geoalchemy2.elements.WKTElement.__init__', return_value=None):
+            with patch('geoalchemy2.elements.WKTElement.desc', return_value=None):
+                with patch('geoalchemy2.elements.WKTElement.asc', return_value=None):
+                    # Create tables - this will now work with SQLite
+                    Base.metadata.create_all(bind=engine)
     
     # Create session
     session_factory = get_session_factory()
@@ -96,6 +113,9 @@ def test_db(test_settings):
     
     # Cleanup
     session.close()
+    
+    # Drop tables
+    Base.metadata.drop_all(bind=engine)
     reset_database_state()
 
 

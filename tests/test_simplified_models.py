@@ -3,7 +3,7 @@ Simplified tests for Link model without PostGIS dependencies.
 """
 import pytest
 from datetime import datetime
-from tests.simplified_models import SimplifiedLink, SimplifiedSpeedRecord
+from tests._models.simplified_models import SimplifiedLink, SimplifiedSpeedRecord
 
 
 class TestSimplifiedLinkModel:

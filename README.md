@@ -129,20 +129,54 @@ python run_tests.py --help-tests
 python run_tests.py --all
 ```
 
-### 📊 Test Coverage
+## 🧪 Test Coverage
 
-- **24 tests** compatible with SQLite (local development)
-- **Complete coverage** of business logic in models
-- **Configuration tests** with environment variables
-- **Database factory tests** with caching and health checks
-- **Isolated tests** for PostGIS (PostgreSQL environment only)
+The project includes comprehensive test coverage reporting:
 
-### 🎯 Testing Strategy
+```bash
+# Run all tests with coverage report
+make test-coverage
 
-1. **Simplified Models**: Versions of models without geometry for SQLite testing
-2. **Structure Tests**: Validate fields, relationships, and methods without a database
-3. **Integration Tests**: Run only in PostgreSQL/PostGIS environment
-4. **TDD Friendly**: All essential tests work locally
+# Run specific module tests
+make test-logging
+make test-middleware
+make test-exceptions
+
+# Custom coverage options
+python scripts/testing/run_coverage.py --module app.core.logging
+```
+
+Coverage reports are generated in multiple formats:
+- Console output (summary)
+- HTML report (`coverage_html/index.html`)
+- XML report (`coverage.xml`) for CI integration
+
+### Coverage Targets
+
+| Component | Target Coverage |
+|-----------|----------------|
+| Core modules | 90%+ |
+| API endpoints | 85%+ |
+| Models | 80%+ |
+| Services | 80%+ |
+| Overall | 85%+ |
+
+The test suite is designed to be incremental, with tests added alongside new features to maintain high coverage levels.
+
+### Test Coverage Reports
+
+After running the tests with coverage, you can find the detailed reports in the `coverage_html` directory. Open `index.html` in a web browser to view the coverage details.
+
+### Example Coverage Output
+
+```
+=============================== coverage summary ===============================
+Statements   : 95.12% ( 370/389 )
+Branches     : 85.76% ( 113/131 )
+Functions    : 92.68% ( 56/60 )
+Lines        : 95.12% ( 370/389 )
+================================================================================
+```
 
 ## 🔍 Data Validation
 

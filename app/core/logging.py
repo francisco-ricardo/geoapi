@@ -25,7 +25,7 @@ import sys
 import json
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Union
 
 from functools import lru_cache
@@ -68,8 +68,8 @@ class JsonFormatter(logging.Formatter):
         """Format log record as JSON string."""
         log_dict = {}
         
-        # Add timestamp
-        log_dict[self.timestamp_field] = datetime.utcnow().isoformat() + "Z"
+        # Add timestamp - usando a forma recomendada em Python 3.12+
+        log_dict[self.timestamp_field] = datetime.now(timezone.utc).isoformat() + "Z"
         
         # Standard log record attributes
         log_dict["level"] = record.levelname

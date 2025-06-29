@@ -1,7 +1,7 @@
 # GeoSpatial Links API - Development Makefile
 # Commands for development using Docker containers from host
 
-.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-api health-check clean-db analyze-data verify-db verify-postgis
+.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-all test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-logging test-middleware test-exceptions clean-pycache
 
 # Container names from docker-compose-dev.yml
 API_CONTAINER = geoapi_api_dev
@@ -21,10 +21,16 @@ help:
 	@echo "  create-tables - Create database tables"
 	@echo "  ingest-data - Ingest Parquet datasets into database"
 	@echo "  run-api     - Start the FastAPI application"
-	@echo "  test        - Run all tests"
+	@echo "  test        - Run SQLite-compatible tests"
+	@echo "  test-all    - Run all tests (requires PostgreSQL)"
 	@echo "  test-api    - Test API endpoints"
+	@echo "  test-coverage - Run tests with coverage reports"
+	@echo "  test-logging - Run logging system tests"
+	@echo "  test-middleware - Run middleware tests"
+	@echo "  test-exceptions - Run exception handler tests"
 	@echo "  health-check- Check database and API health"
 	@echo "  clean-db    - Clean database (drop all tables)"
+	@echo "  clean-pycache - Clean Python cache files"
 	@echo "  shell       - Open shell in API container"
 	@echo ""
 	@echo "Quick start for new users:"
@@ -80,12 +86,17 @@ run-api:
 	@echo "Docs at: http://localhost:8000/docs"
 
 # Run tests
-test:
+test: clean-pycache
 	@echo "Running all tests..."
-	@docker exec $(API_CONTAINER) python scripts/testing/run_tests.py
+	@docker exec $(API_CONTAINER) python scripts/testing/run_tests.py --sqlite
+
+# Run all tests (including PostGIS)
+test-all: clean-pycache
+	@echo "Running ALL tests (requires PostgreSQL/PostGIS)..."
+	@docker exec $(API_CONTAINER) python scripts/testing/run_tests.py --all
 
 # Test API endpoints
-test-api:
+test-api: clean-pycache
 	@echo "Testing API endpoints..."
 	@docker exec $(API_CONTAINER) python scripts/testing/test_endpoints.py
 
@@ -125,3 +136,26 @@ shell:
 db-shell:
 	@echo "Opening database shell..."
 	@docker exec -it $(DB_CONTAINER) psql -U geoapi -d geoapi
+
+# Test coverage commands
+test-coverage: clean-pycache
+	@echo "Running tests with coverage reports..."
+	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py
+
+test-logging: clean-pycache
+	@echo "Running logging system tests..."
+	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py --category logging --module app.core.logging
+
+test-middleware: clean-pycache
+	@echo "Running middleware tests..."
+	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py --category logging --module app.middleware.logging_middleware
+
+test-exceptions: clean-pycache
+	@echo "Running exception handler tests..."
+	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py --category logging --module app.core.exceptions
+
+# Clean Python cache
+clean-pycache:
+	find . -type d -name '__pycache__' -exec rm -rf {} +
+	find . -type f -name '*.pyc' -delete
+	rm -rf .pytest_cache .mypy_cache .pylint.d
