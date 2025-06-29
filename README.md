@@ -415,3 +415,97 @@ def process_speed_records_chunked(session, existing_link_ids):
 This optimization approach allowed us to successfully process over **1.3 million records** with complex spatial data while maintaining excellent performance and reliability.
 
 ---
+
+## 📋 Logging and Observability
+
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Ready-4287f5.svg)](https://opentelemetry.io/)
+[![Correlation-IDs](https://img.shields.io/badge/Correlation_IDs-Enabled-green.svg)](https://microservices.io/patterns/observability/distributed-tracing.html)
+
+The API includes a comprehensive logging and observability system:
+
+### Key Features
+
+- **Structured Logging**: Supports both human-readable console logs and machine-parseable JSON format
+- **Correlation IDs**: Every request gets a unique ID that is propagated through all logs
+- **Request/Response Logging**: Automatic logging of all HTTP requests with timing and performance metrics
+- **Cloud-Ready**: Designed for integration with cloud observability platforms
+- **Contextual Logging**: Endpoint handlers can access request-scoped loggers with correlation IDs
+
+### Configuration
+
+Logging can be configured via environment variables:
+
+```bash
+# Logging configuration
+GEOAPI_LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+GEOAPI_LOG_FORMAT=console  # console or json
+GEOAPI_LOG_TO_FILE=false  # true or false
+GEOAPI_LOG_FILE_PATH=/var/log/geoapi/app.log  # Path for file logging
+
+# Observability settings
+GEOAPI_ENABLE_TRACING=false  # Enable distributed tracing
+GEOAPI_TRACING_PROVIDER=otlp  # otlp, jaeger, honeycomb
+GEOAPI_TRACING_ENDPOINT=http://localhost:4317  # Endpoint for tracing exporter
+```
+
+### Log Formats
+
+#### Development Mode (Console)
+```
+2025-06-29 10:15:23,456 [INFO] geoapi.request:42 - Request started: GET /api/v1/links
+2025-06-29 10:15:23,512 [INFO] geoapi.request:98 - Request completed: GET /api/v1/links - 200
+```
+
+#### Production Mode (JSON)
+```json
+{
+  "timestamp": "2025-06-29T10:15:23.456Z",
+  "level": "INFO",
+  "message": "Request completed: GET /api/v1/links - 200",
+  "logger": "geoapi.request",
+  "location": {
+    "module": "logging_middleware",
+    "function": "dispatch",
+    "line": 98
+  },
+  "correlation_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+  "http": {
+    "method": "GET",
+    "url": "http://localhost:8000/api/v1/links",
+    "status_code": 200,
+    "response_time": 0.056,
+    "request_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+  },
+  "event": "request_completed",
+  "performance": {
+    "response_time": 0.056
+  }
+}
+```
+
+### Usage in Code
+
+```python
+# In FastAPI endpoints
+@app.get("/items/{item_id}")
+async def get_item(
+    item_id: int, 
+    logger: ContextLogger = Depends(get_request_logger)
+):
+    logger.info(f"Processing item {item_id}")
+    
+    # Add context for this specific operation
+    operation_logger = logger.with_context({"operation": "get_item"})
+    operation_logger.debug("Detailed operation info", extra={"item_id": item_id})
+    
+    return {"item_id": item_id}
+```
+
+### Future Observability
+
+The system is designed for easy integration with:
+
+- **OpenTelemetry**: For distributed tracing across services
+- **Cloud Logging**: Structured JSON logs ready for Google Cloud Logging, AWS CloudWatch, etc.
+- **Metrics Export**: Framework in place for exporting performance metrics
+- **Alerting**: Error logs are structured for easy integration with alerting systems

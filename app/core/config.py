@@ -2,7 +2,7 @@
 Application configuration settings.
 """
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -25,6 +25,38 @@ class Settings(BaseSettings):
     # Application settings
     app_name: str = Field(default="GeoAPI", description="Application name")
     app_version: str = Field(default="1.0.0", description="Application version")
+    
+    # Logging settings
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
+        default="INFO",
+        description="Logging level"
+    )
+    log_format: Literal["console", "json"] = Field(
+        default="console",
+        description="Logging format (console for development, json for production)"
+    )
+    log_to_file: bool = Field(
+        default=False,
+        description="Whether to log to file"
+    )
+    log_file_path: Optional[str] = Field(
+        default="/var/log/geoapi/app.log",
+        description="Path to log file if log_to_file is True"
+    )
+    
+    # Observability settings
+    enable_tracing: bool = Field(
+        default=False,
+        description="Enable distributed tracing"
+    )
+    tracing_provider: Optional[Literal["otlp", "jaeger", "honeycomb"]] = Field(
+        default=None,
+        description="Tracing provider to use"
+    )
+    tracing_endpoint: Optional[str] = Field(
+        default=None,
+        description="Endpoint for tracing provider"
+    )
     
     # Mapbox settings (optional for API, required for notebooks)
     mapbox_access_token: Optional[str] = Field(
