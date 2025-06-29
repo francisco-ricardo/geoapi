@@ -1,7 +1,7 @@
 # GeoSpatial Links API - Development Makefile
 # Commands for development using Docker containers from host
 
-.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-all test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-logging test-middleware test-exceptions clean-pycache
+.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-all test-unit test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-models test-schemas test-core test-middleware test-database test-logging clean-pycache
 
 # Container names from docker-compose-dev.yml
 API_CONTAINER = geoapi_api_dev
@@ -21,13 +21,17 @@ help:
 	@echo "  create-tables - Create database tables"
 	@echo "  ingest-data - Ingest Parquet datasets into database"
 	@echo "  run-api     - Start the FastAPI application"
-	@echo "  test        - Run SQLite-compatible tests"
-	@echo "  test-all    - Run all tests (requires PostgreSQL)"
-	@echo "  test-api    - Test API endpoints"
+	@echo "  test        - Run unit tests"
+	@echo "  test-all    - Run all unit tests (comprehensive)"
+	@echo "  test-unit   - Run unit tests only"
+	@echo "  test-api    - Test API endpoints (using test script)"
 	@echo "  test-coverage - Run tests with coverage reports"
-	@echo "  test-logging - Run logging system tests"
-	@echo "  test-middleware - Run middleware tests"
-	@echo "  test-exceptions - Run exception handler tests"
+	@echo "  test-models     - Run model tests only"
+	@echo "  test-schemas    - Run schema tests only" 
+	@echo "  test-core       - Run core functionality tests"
+	@echo "  test-middleware - Run middleware tests only"
+	@echo "  test-database   - Run database tests only"
+	@echo "  test-logging    - Run logging system tests"
 	@echo "  health-check- Check database and API health"
 	@echo "  clean-db    - Clean database (drop all tables)"
 	@echo "  clean-pycache - Clean Python cache files"
@@ -69,6 +73,16 @@ setup: start
 	@docker exec $(API_CONTAINER) python scripts/data/ingest_datasets.py
 	@echo "Setup complete!"
 
+# Test coverage with extended tests
+test-extended-coverage: clean-pycache
+	@echo "Running extended coverage tests..."
+	@docker exec $(API_CONTAINER) bash scripts/testing/run_extended_coverage.sh
+
+# Run all tests with full coverage
+test-full-coverage: clean-pycache
+	@echo "Running all tests with full coverage..."
+	@docker exec $(API_CONTAINER) bash scripts/run_all_tests_clean.sh
+
 # Create database tables
 create-tables:
 	@echo "Creating database tables..."
@@ -87,15 +101,45 @@ run-api:
 
 # Run tests
 test: clean-pycache
-	@echo "Running all tests..."
-	@docker exec $(API_CONTAINER) python scripts/testing/run_tests.py --sqlite
+	@echo "Running unit tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/ -v
 
-# Run all tests (including PostGIS)
+# Run all tests (unit only - no integration tests exist yet)
 test-all: clean-pycache
-	@echo "Running ALL tests (requires PostgreSQL/PostGIS)..."
-	@docker exec $(API_CONTAINER) python scripts/testing/run_tests.py --all
+	@echo "Running ALL unit tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/ -v
 
-# Test API endpoints
+# Run unit tests only
+test-unit: clean-pycache
+	@echo "Running unit tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/ -v
+
+# Run tests with coverage
+test-coverage: clean-pycache
+	@echo "Running tests with coverage..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/ --cov=app --cov-report=html --cov-report=xml --cov-report=term
+
+# Run model tests only
+test-models: clean-pycache
+	@echo "Running model tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/models/ -v
+
+# Run schema tests only
+test-schemas: clean-pycache
+	@echo "Running schema tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/schemas/ -v
+
+# Run core functionality tests
+test-core: clean-pycache
+	@echo "Running core functionality tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/core/ -v
+
+# Run middleware tests only
+test-middleware: clean-pycache
+	@echo "Running middleware tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/middleware/ -v
+
+# Test API endpoints using test script
 test-api: clean-pycache
 	@echo "Testing API endpoints..."
 	@docker exec $(API_CONTAINER) python scripts/testing/test_endpoints.py
@@ -137,22 +181,19 @@ db-shell:
 	@echo "Opening database shell..."
 	@docker exec -it $(DB_CONTAINER) psql -U geoapi -d geoapi
 
-# Test coverage commands
-test-coverage: clean-pycache
-	@echo "Running tests with coverage reports..."
-	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py
+# Test coverage commands - updated for new structure
+test-coverage-detailed: clean-pycache
+	@echo "Running detailed coverage analysis..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/ --cov=app --cov-report=html --cov-report=xml --cov-report=term --cov-branch
+
+# Database and API verification
+test-database: clean-pycache
+	@echo "Running database tests..."
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/core/test_database.py -v
 
 test-logging: clean-pycache
 	@echo "Running logging system tests..."
-	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py --category logging --module app.core.logging
-
-test-middleware: clean-pycache
-	@echo "Running middleware tests..."
-	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py --category logging --module app.middleware.logging_middleware
-
-test-exceptions: clean-pycache
-	@echo "Running exception handler tests..."
-	@docker exec $(API_CONTAINER) python scripts/testing/run_coverage.py --category logging --module app.core.exceptions
+	@docker exec $(API_CONTAINER) python -m pytest tests/unit/core/test_logging.py -v
 
 # Clean Python cache
 clean-pycache:

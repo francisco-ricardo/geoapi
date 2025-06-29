@@ -59,7 +59,7 @@ def test_db_simple(test_settings):
     reset_database_state()
     
     from app.core.database import get_engine, get_session_factory
-    from tests._models.simplified_models import ModelBase
+    from tests.fixtures.models import ModelBase
     from sqlalchemy import event
     
     # Create engine and tables for simplified models
