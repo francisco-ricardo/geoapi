@@ -60,6 +60,8 @@ make run-api-dev        # Recommended for development (auto-reload + debug)
 # - Health Check: http://localhost:8000/health
 ```
 
+> **📋 Note**: The API container starts but doesn't auto-run the FastAPI app, giving you control over when and how to start it (dev/prod mode). This is a professional practice for better debugging and flexibility.
+
 ### Quick Verification
 ```bash
 # Check if everything is working
@@ -74,7 +76,7 @@ make test               # Run tests to verify setup
 |---------|-------------|----------|
 | `make start` | Start containers (DB + API container) | Initial setup |
 | `make setup` | Complete setup (start + tables + data) | First time setup |
-| `make run-api-dev` | Start FastAPI with auto-reload + debug | **Development** |
+| `make run-api-dev` | Start FastAPI with auto-reload + debug | **Development (RECOMMENDED)** |
 | `make run-api` | Start FastAPI with auto-reload | Basic usage |
 | `make check-api` | Quick API health check | Verify API works |
 | `make api-status` | Complete status (container + API + endpoints) | Troubleshooting |
@@ -84,18 +86,20 @@ make test               # Run tests to verify setup
 ### Alternative Commands
 ```bash
 # Step by step setup
-make start              # Start containers
+make start              # Start containers (DB + prepare API container)
 make create-tables      # Create database tables
 make ingest-data        # Load Parquet datasets
 
-# API Management
-make run-api            # Start FastAPI with uvicorn
-make run-api-dev        # Start FastAPI in development mode (recommended)
-make run-api-prod       # Start FastAPI in production mode
+# API Management - PROFESSIONAL WORKFLOW
+make run-api-dev        # Start FastAPI in development mode (RECOMMENDED)
 make check-api          # Check if API is responding
 make stop-api           # Stop API process (uvicorn)
 make restart-api        # Restart API process
 make api-status         # Show API status and endpoints
+
+# Legacy/Alternative API commands
+make run-api            # Basic FastAPI start
+make run-api-prod       # Start FastAPI in production mode
 
 # Development commands
 make logs              # View container logs
