@@ -1,7 +1,7 @@
 # GeoSpatial Links API - Development Makefile
 # Commands for development using Docker containers from host
 
-.PHONY: help setup start stop restart logs create-tables ingest-data run-api test test-all test-unit test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-models test-schemas test-core test-middleware test-database test-logging clean-pycache format format-check type-check type-check-strict sort-imports sort-imports-check quality-check
+.PHONY: help setup start stop restart logs create-tables ingest-data run-api run-api-dev run-api-prod check-api stop-api restart-api api-status test test-all test-unit test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-models test-schemas test-core test-middleware test-database test-logging clean-pycache format format-check type-check type-check-strict sort-imports sort-imports-check quality-check clean-empty-files install-quality-tools
 
 # Container names from docker-compose-dev.yml
 API_CONTAINER = geoapi_api_dev
@@ -20,7 +20,13 @@ help:
 	@echo "  setup       - Complete setup (start + tables + ingest)"
 	@echo "  create-tables - Create database tables"
 	@echo "  ingest-data - Ingest Parquet datasets into database"
-	@echo "  run-api     - Start the FastAPI application"
+	@echo "  run-api     - Start FastAPI with uvicorn"
+	@echo "  run-api-dev - Start FastAPI in development mode"
+	@echo "  run-api-prod- Start FastAPI in production mode"
+	@echo "  check-api   - Check if API is responding"
+	@echo "  stop-api    - Stop API process (uvicorn)"
+	@echo "  restart-api - Restart API process"
+	@echo "  api-status  - Show API status and endpoints"
 	@echo "  test        - Run unit tests"
 	@echo "  test-all    - Run all unit tests (comprehensive)"
 	@echo "  test-unit   - Run unit tests only"
@@ -39,6 +45,7 @@ help:
 	@echo "  sort-imports    - Sort imports with isort"
 	@echo "  sort-imports-check - Check import sorting"
 	@echo "  quality-check   - Run all quality checks"
+	@echo "  clean-empty-files - Remove empty Python files"
 	@echo "  health-check- Check database and API health"
 	@echo "  clean-db    - Clean database (drop all tables)"
 	@echo "  clean-pycache - Clean Python cache files"
@@ -100,11 +107,50 @@ ingest-data:
 	@echo "Ingesting Parquet datasets..."
 	@docker exec $(API_CONTAINER) python scripts/data/ingest_datasets.py
 
-# Start the FastAPI application (already running in container)
+# Start the FastAPI application with uvicorn
 run-api:
-	@echo "FastAPI is already running in container $(API_CONTAINER)"
-	@echo "Access at: http://localhost:8000"
-	@echo "Docs at: http://localhost:8000/docs"
+	@echo "Starting FastAPI application with uvicorn..."
+	@docker exec $(API_CONTAINER) uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Start FastAPI in development mode (with auto-reload)
+run-api-dev:
+	@echo "Starting FastAPI in development mode..."
+	@docker exec -it $(API_CONTAINER) uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+
+# Start FastAPI in production mode
+run-api-prod:
+	@echo "Starting FastAPI in production mode..."
+	@docker exec $(API_CONTAINER) uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+# Check if API is running
+check-api:
+	@echo "Checking if API is running..."
+	@curl -f http://localhost:8000/health 2>/dev/null && echo "✅ API is running!" || echo "❌ API is not responding"
+
+# Stop API process in container (kill uvicorn)
+stop-api:
+	@echo "Stopping API process..."
+	@docker exec $(API_CONTAINER) pkill -f uvicorn || echo "No uvicorn process found"
+
+# Restart API process
+restart-api: stop-api
+	@echo "Restarting API..."
+	@sleep 2
+	@$(MAKE) run-api-dev
+
+# Show API status and endpoints
+api-status:
+	@echo "=== API Status ==="
+	@echo "Container status:"
+	@docker ps --filter "name=$(API_CONTAINER)" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+	@echo ""
+	@echo "API Health Check:"
+	@curl -s http://localhost:8000/health 2>/dev/null | head -c 200 || echo "API not responding"
+	@echo ""
+	@echo "=== Access Points ==="
+	@echo "API Server: http://localhost:8000"
+	@echo "API Docs: http://localhost:8000/docs"
+	@echo "Health Check: http://localhost:8000/health"
 
 # Run tests
 test: clean-pycache
@@ -241,3 +287,8 @@ quality-check: format-check type-check sort-imports-check
 install-quality-tools:
 	@echo "Installing quality tools..."
 	@docker exec $(API_CONTAINER) pip install black mypy isort
+
+# Clean empty files that VS Code might recreate
+clean-empty-files:
+	@echo "Cleaning empty Python files..."
+	@bash scripts/clean_empty_files.sh

@@ -45,17 +45,41 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 
 ### Setup and Run
 ```bash
-# 1. Start the containers (database + API)
+# 1. Start the containers (database + API container)
 make start
 
 # 2. Complete setup (tables + data ingestion)
 make setup
 
-# 3. Access the API
+# 3. Start the API with uvicorn
+make run-api-dev        # Recommended for development (auto-reload + debug)
+
+# 4. Access the API
 # - API Server: http://localhost:8000
 # - API Documentation: http://localhost:8000/docs
 # - Health Check: http://localhost:8000/health
 ```
+
+### Quick Verification
+```bash
+# Check if everything is working
+make api-status         # Complete status check
+make check-api          # Quick API health check
+make test               # Run tests to verify setup
+```
+
+### 📝 Command Summary
+
+| Command | Description | Use Case |
+|---------|-------------|----------|
+| `make start` | Start containers (DB + API container) | Initial setup |
+| `make setup` | Complete setup (start + tables + data) | First time setup |
+| `make run-api-dev` | Start FastAPI with auto-reload + debug | **Development** |
+| `make run-api` | Start FastAPI with auto-reload | Basic usage |
+| `make check-api` | Quick API health check | Verify API works |
+| `make api-status` | Complete status (container + API + endpoints) | Troubleshooting |
+| `make test` | Run unit tests | Verify functionality |
+| `make logs` | View container logs | Debugging |
 
 ### Alternative Commands
 ```bash
@@ -63,6 +87,15 @@ make setup
 make start              # Start containers
 make create-tables      # Create database tables
 make ingest-data        # Load Parquet datasets
+
+# API Management
+make run-api            # Start FastAPI with uvicorn
+make run-api-dev        # Start FastAPI in development mode (recommended)
+make run-api-prod       # Start FastAPI in production mode
+make check-api          # Check if API is responding
+make stop-api           # Stop API process (uvicorn)
+make restart-api        # Restart API process
+make api-status         # Show API status and endpoints
 
 # Development commands
 make logs              # View container logs
@@ -75,10 +108,92 @@ make health-check      # Check system health
 make validate-ingestion # Validate data ingestion integrity
 ```
 
+### API Development Workflow
+
+```bash
+# Quick Start for API Development
+make start              # 1. Start containers (PostgreSQL + API container)
+make run-api-dev        # 2. Start FastAPI with auto-reload and debug
+make check-api          # 3. Verify API is responding
+
+# Daily Development Cycle
+make run-api-dev        # Start API in development mode
+# Make code changes... (auto-reload active)
+make test               # Run tests
+make check-api          # Verify API still works
+
+# API Status and Debugging
+make api-status         # Show complete API status
+make logs               # View container logs for debugging
+make restart-api        # Restart if needed
+```
+
+### API Management Commands
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `make run-api-dev` | Start FastAPI with auto-reload + debug | **Development** (recommended) |
+| `make run-api` | Start FastAPI with auto-reload | Basic development |
+| `make run-api-prod` | Start FastAPI with 4 workers | Production testing |
+| `make check-api` | Test if API responds | Quick health check |
+| `make api-status` | Complete status (container + API + endpoints) | Troubleshooting |
+| `make stop-api` | Stop uvicorn process | Stop API without stopping containers |
+| `make restart-api` | Restart API process | After configuration changes |
+
 ### Access Points
 - **API Server**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs  
 - **Health Check**: http://localhost:8000/health
+
+## 🔧 Development & Troubleshooting
+
+### Common Development Tasks
+
+```bash
+# Start development environment
+make start && make run-api-dev
+
+# Run tests while developing
+make test                    # Quick unit tests
+make test-coverage          # Tests with coverage report
+make test-api               # Test API endpoints
+
+# Code quality checks
+make format                 # Format code with Black
+make type-check            # Type checking with mypy
+make sort-imports          # Sort imports with isort
+make quality-check         # All quality checks combined
+```
+
+### Troubleshooting Guide
+
+#### API Not Responding
+```bash
+make api-status            # Check status
+make logs                  # View logs
+make restart-api           # Restart API process
+```
+
+#### Container Issues
+```bash
+make restart               # Restart all containers
+make logs                  # Check container logs
+make shell                 # Debug inside container
+```
+
+#### Database Issues
+```bash
+make db-shell              # Open PostgreSQL shell
+make health-check          # Check database connectivity
+make clean-db              # Clean database (careful!)
+```
+
+#### Development Issues
+```bash
+make clean-empty-files     # Remove VS Code empty files
+make clean-pycache         # Clean Python cache
+make format                # Fix code formatting
+```
 
 ## 🔌 Technologies
 
@@ -379,27 +494,48 @@ docker-compose -f docker-compose-dev.yml up -d
 
 ## 🔧 Development
 
-### 1. Configure Environment
+### 1. Setup Development Environment
 
 ```bash
-# Install dependencies
-pip install -r requirements-dev.txt
+# Start containers
+make start
 
-# Configure Python environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate     # Windows
+# Start API in development mode
+make run-api-dev
+
+# Verify everything is working
+make api-status
+make test
 ```
 
-### 2. Run Tests
+### 2. Development Workflow
 
 ```bash
-# Local development (SQLite)
-python run_tests.py --sqlite
+# Daily development cycle
+make run-api-dev        # Start API with auto-reload
+# Edit code... (changes auto-reload)
+make test               # Run tests
+make check-api          # Verify API works
 
-# Complete environment (PostgreSQL)
-python run_tests.py --all
+# Code quality
+make format             # Format with Black
+make type-check         # Type checking
+make quality-check      # All quality checks
+```
+
+### 3. API Development Commands
+
+```bash
+# API Management
+make run-api-dev        # Development mode (auto-reload + debug)
+make run-api            # Basic mode (auto-reload)
+make run-api-prod       # Production mode (4 workers)
+
+# Status and Control
+make api-status         # Complete status check
+make check-api          # Quick health check
+make stop-api           # Stop API process
+make restart-api        # Restart API process
 ```
 
 ### 3. Model Structure

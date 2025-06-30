@@ -22,6 +22,7 @@ log/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.vscode/*.code-workspace
 .history
 
 # Jupyter Notebook #
@@ -47,3 +48,15 @@ site/
 # Ignore test reports
 junit-*.xml
 coverage.xml
+
+# Prevent empty files from being created
+**/*_additional.py
+**/*_extended.py
+**/*_coverage.py
+**/*_updated.py
+**/*_consolidated.py
+
+# Temporary or auto-generated empty files
+**/test_*.py
+!tests/unit/**/test_*.py
+!tests/fixtures/**/test_*.py
