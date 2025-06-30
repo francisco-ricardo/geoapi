@@ -133,10 +133,7 @@ stop-api:
 	@docker exec $(API_CONTAINER) pkill -f uvicorn || echo "No uvicorn process found"
 
 # Restart API process
-restart-api: stop-api
-	@echo "Restarting API..."
-	@sleep 2
-	@$(MAKE) run-api-dev
+restart-api: stop-api run-api-dev
 
 # Show API status and endpoints
 api-status:
