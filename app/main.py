@@ -41,7 +41,7 @@ setup_logging_middleware(app)
 # Register exception handlers
 register_exception_handlers(app)
 
-# Include API routes - CONFORME REQUISITOS (sem prefixo /api/v1)
+# Include API routes
 app.include_router(links.router, tags=["links"])
 app.include_router(aggregates.router, tags=["aggregations"])
 

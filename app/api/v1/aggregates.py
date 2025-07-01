@@ -76,7 +76,7 @@ async def get_aggregates(
 
 
 @router.get("/aggregates/{link_id}", response_model=SingleLinkAggregateResponse)
-async def get_aggregate_by_link(
+async def get_link_aggregate(
     link_id: int,
     day: str = Query(..., description="Day of week (Monday, Tuesday, etc.)"),
     period: str = Query(..., description="Time period (AM Peak, PM Peak, etc.)"),
@@ -86,14 +86,14 @@ async def get_aggregate_by_link(
     """
     Get speed and metadata for a single road segment.
 
-    Returns aggregated speed data for a specific link including:
-    - Average speed for the specified day/period
-    - Statistical measures for that link
-    - Link metadata and geometry
-    - Number of records used in aggregation
+    Returns detailed aggregation data for a specific link including:
+    - Average speed for the given day/period
+    - Statistical measures (min, max, standard deviation)
+    - Link metadata (road name, geometry, length)
+    - Number of speed records used in calculation
 
     Args:
-        link_id: ID of the specific link
+        link_id: Unique identifier for the road link
         day: Day of week (e.g., "Monday", "Tuesday")
         period: Time period (e.g., "AM Peak", "PM Peak", "Midday")
         db: Database session
@@ -103,43 +103,54 @@ async def get_aggregate_by_link(
         SingleLinkAggregateResponse: Aggregated data for the specific link
 
     Raises:
-        HTTPException: If link not found or parameters invalid
+        HTTPException: If link_id not found or day/period parameters are invalid
     """
-    logger.info(f"Getting aggregate for link_id={link_id}, day={day}, period={period}")
+    logger.info(
+        f"Getting aggregate data for link {link_id}",
+        extra={"link_id": link_id, "day": day, "period": period},
+    )
 
     try:
-        # Create aggregation service
-        aggregation_service = AggregationService(db)
+        # Use service layer for business logic
+        service = AggregationService(db)
+        result = service.get_single_link_aggregate(
+            link_id=link_id, day=day, period=period
+        )
 
-        # Get single link aggregated data
-        link_data = aggregation_service.get_single_link_aggregate(link_id, day, period)
-
-        if not link_data:
+        if result is None:
             logger.warning(
-                f"No data found for link_id={link_id}, day={day}, period={period}"
+                f"Link {link_id} not found or no data available",
+                extra={"link_id": link_id, "day": day, "period": period},
             )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No data found for link {link_id} on {day} during {period}",
+                detail=f"Link {link_id} not found or no data available for {day} {period}",
             )
 
-        # Convert to response object
-        response = SingleLinkAggregateResponse(**link_data)
+        # Convert dict result to schema
+        response_data = SingleLinkAggregateResponse(**result)
 
-        logger.info(f"Successfully retrieved aggregate for link_id={link_id}")
-        return response
+        logger.info(
+            f"Successfully retrieved data for link {link_id}",
+            extra={
+                "link_id": link_id,
+                "record_count": response_data.record_count,
+                "average_speed": response_data.average_speed,
+            },
+        )
+
+        return response_data
 
     except HTTPException:
-        # Re-raise HTTP exceptions as-is
         raise
-    except ValueError as e:
-        logger.warning(f"Invalid parameters: {str(e)}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
-        logger.exception(f"Error getting aggregate for link {link_id}: {str(e)}")
+        logger.error(
+            f"Error getting aggregate for link {link_id}: {str(e)}",
+            extra={"link_id": link_id, "day": day, "period": period, "error": str(e)},
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal server error: {str(e)}",
+            detail="Internal server error while processing request",
         )
 
 
@@ -184,4 +195,80 @@ async def get_data_summary(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}",
+        )
+
+
+@router.get("/patterns/slow_links/", response_model=List[AggregatedSpeedData])
+async def get_slow_links(
+    period: str = Query(..., description="Time period (AM Peak, PM Peak, etc.)"),
+    threshold: float = Query(..., description="Speed threshold in mph (e.g., 15.0)"),
+    min_days: int = Query(
+        ..., description="Minimum number of days the condition must be met (1-7)"
+    ),
+    db: Session = Depends(get_db),
+    logger: ContextLogger = Depends(get_request_logger),
+) -> List[AggregatedSpeedData]:
+    """
+    Get links with average speeds below threshold for at least min_days in a week.
+
+    Identifies chronically slow road segments by analyzing speed patterns across
+    multiple days of the week for a specific time period.
+
+    Args:
+        period: Time period (e.g., "AM Peak", "PM Peak", "Midday")
+        threshold: Speed threshold in mph (links below this are considered slow)
+        min_days: Minimum number of days the condition must be met (1-7)
+        db: Database session
+        logger: Request-scoped logger
+
+    Returns:
+        List[AggregatedSpeedData]: Links meeting the slow speed criteria
+
+    Raises:
+        HTTPException: If parameters are invalid or out of range
+    """
+    logger.info(
+        f"Getting slow links for period={period}, threshold={threshold}, min_days={min_days}",
+        extra={"period": period, "threshold": threshold, "min_days": min_days},
+    )
+
+    try:
+        # Validate parameters
+        if threshold <= 0:
+            raise ValueError("Threshold must be positive")
+        if not (1 <= min_days <= 7):
+            raise ValueError("min_days must be between 1 and 7")
+
+        # Use service layer for business logic
+        service = AggregationService(db)
+        results = service.get_slow_links_pattern(
+            period=period, threshold=threshold, min_days=min_days
+        )
+
+        # Convert to response objects
+        response_data = [AggregatedSpeedData(**item) for item in results]
+
+        logger.info(
+            f"Found {len(response_data)} slow links meeting criteria",
+            extra={
+                "count": len(response_data),
+                "period": period,
+                "threshold": threshold,
+                "min_days": min_days,
+            },
+        )
+
+        return response_data
+
+    except ValueError as e:
+        logger.warning(f"Invalid parameters: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        logger.error(
+            f"Error getting slow links: {str(e)}",
+            extra={"period": period, "threshold": threshold, "min_days": min_days},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while processing request",
         )

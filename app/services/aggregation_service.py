@@ -201,3 +201,116 @@ class AggregationService:
             "available_days": self.get_available_days()
             or ["Data missing - using Monday as default"],
         }
+
+    def get_slow_links_pattern(
+        self, period: str, threshold: float, min_days: int
+    ) -> List[Dict[str, Any]]:
+        """
+        Get links with average speeds below threshold for at least min_days in a week.
+
+        Args:
+            period: Time period (e.g., "AM Peak")
+            threshold: Speed threshold in mph
+            min_days: Minimum number of days the condition must be met
+
+        Returns:
+            List of links meeting the slow speed criteria
+        """
+        # Validate time period
+        _, period_obj = validate_day_period_params(
+            "Monday", period
+        )  # Just validate period
+
+        logger.info(
+            f"Finding slow links: period={period}, threshold={threshold}, min_days={min_days}"
+        )
+
+        # Query to find links that have average speed below threshold
+        # for at least min_days in the week
+        subquery = (
+            self.db.query(
+                SpeedRecord.link_id,
+                SpeedRecord.day_of_week,
+                func.avg(SpeedRecord.speed).label("daily_avg_speed"),
+            )
+            .filter(SpeedRecord.time_period == period)
+            .filter(SpeedRecord.day_of_week.isnot(None))
+            .group_by(SpeedRecord.link_id, SpeedRecord.day_of_week)
+            .having(func.avg(SpeedRecord.speed) < threshold)
+            .subquery()
+        )
+
+        # Count how many days each link meets the criteria
+        slow_links_query = (
+            self.db.query(
+                subquery.c.link_id,
+                func.count(subquery.c.day_of_week).label("slow_days_count"),
+            )
+            .group_by(subquery.c.link_id)
+            .having(func.count(subquery.c.day_of_week) >= min_days)
+        )
+
+        # Get the link IDs that meet our criteria
+        slow_link_ids = [row.link_id for row in slow_links_query.all()]
+
+        if not slow_link_ids:
+            logger.info("No links found meeting the slow pattern criteria")
+            return []
+
+        # Now get the aggregated data for these links for the specified period
+        # We'll use the average across all available days for this period
+        query = (
+            self.db.query(
+                Link.link_id,
+                Link.road_name,
+                Link.length,
+                Link.road_type,
+                Link.speed_limit,
+                ST_AsGeoJSON(Link.geometry).label("geometry"),
+                func.avg(SpeedRecord.speed).label("average_speed"),
+                func.count(SpeedRecord.id).label("record_count"),
+                func.min(SpeedRecord.speed).label("min_speed"),
+                func.max(SpeedRecord.speed).label("max_speed"),
+                func.stddev(SpeedRecord.speed).label("speed_stddev"),
+            )
+            .join(SpeedRecord, Link.link_id == SpeedRecord.link_id)
+            .filter(SpeedRecord.time_period == period)
+            .filter(SpeedRecord.day_of_week.isnot(None))
+            .filter(Link.link_id.in_(slow_link_ids))
+            .group_by(
+                Link.link_id,
+                Link.road_name,
+                Link.length,
+                Link.road_type,
+                Link.speed_limit,
+                Link.geometry,
+            )
+            .order_by(func.avg(SpeedRecord.speed))
+        )
+
+        results = []
+        for row in query.all():
+            # Parse geometry JSON
+            geometry = json.loads(row.geometry) if row.geometry else None
+
+            result = {
+                "link_id": row.link_id,
+                "road_name": row.road_name,
+                "length": float(row.length) if row.length else None,
+                "road_type": row.road_type,
+                "speed_limit": row.speed_limit,
+                "geometry": geometry,
+                "average_speed": (
+                    round(float(row.average_speed), 2) if row.average_speed else None
+                ),
+                "record_count": row.record_count,
+                "min_speed": round(float(row.min_speed), 2) if row.min_speed else None,
+                "max_speed": round(float(row.max_speed), 2) if row.max_speed else None,
+                "speed_stddev": (
+                    round(float(row.speed_stddev), 2) if row.speed_stddev else None
+                ),
+            }
+            results.append(result)
+
+        logger.info(f"Found {len(results)} links with consistent slow speeds")
+        return results
