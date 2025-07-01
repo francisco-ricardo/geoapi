@@ -66,7 +66,9 @@ class AggregatedSpeedData(BaseModel):
 
 # Response types - Direct list/item for client compatibility with overview.txt requirements
 AggregationListResponse = List[AggregatedSpeedData]  # Direct list for /aggregates/
-SingleLinkAggregateResponse = AggregatedSpeedData  # Single item for /aggregates/{link_id}
+SingleLinkAggregateResponse = (
+    AggregatedSpeedData  # Single item for /aggregates/{link_id}
+)
 
 
 class DataSummaryResponse(BaseModel):
@@ -121,3 +123,25 @@ class AggregateQueryParams(BaseModel):
 
     class Config:
         schema_extra = {"example": {"day": "Monday", "period": "AM Peak"}}
+
+
+class SpatialFilterRequest(BaseModel):
+    """
+    Request body for spatial filtering endpoint.
+    Compatible with overview.txt specification.
+    """
+
+    day: str = Field(..., description="Day of week (Monday, Tuesday, etc.)")
+    period: str = Field(..., description="Time period (AM Peak, PM Peak, etc.)")
+    bbox: List[float] = Field(
+        ..., description="Bounding box as [min_lon, min_lat, max_lon, max_lat]"
+    )
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "day": "Wednesday",
+                "period": "AM Peak",
+                "bbox": [-81.8, 30.1, -81.6, 30.3],
+            }
+        }

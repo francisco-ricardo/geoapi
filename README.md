@@ -149,7 +149,203 @@ make restart-api        # Restart if needed
 - **API Documentation**: http://localhost:8000/docs  
 - **Health Check**: http://localhost:8000/health
 
-## 🔧 Development & Troubleshooting
+## � API Endpoints
+
+The GeoAPI provides 4 main endpoints for traffic data analysis and geospatial querying. All endpoints return JSON responses and follow RESTful conventions.
+
+### 1. 📊 GET `/aggregates/` - Daily Speed Aggregates
+
+Get aggregated speed data for all links on a specific day and time period.
+
+**Parameters:**
+- `day` (required): Day of the week ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+- `period` (required): Time period ("Overnight", "Early Morning", "AM Peak", "Midday", "Early Afternoon", "PM Peak", "Evening")
+
+**Example Request:**
+```bash
+# Get AM Peak data for Monday
+curl "http://localhost:8000/aggregates/?day=Monday&period=AM%20Peak"
+
+# Get Evening data for Friday
+curl "http://localhost:8000/aggregates/?day=Friday&period=Evening"
+```
+
+**Example Response:**
+```json
+[
+  {
+    "link_id": 16981048,
+    "road_name": "Philips Hwy",
+    "length": 0.009320565,
+    "road_type": null,
+    "speed_limit": null,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [[-81.59791, 30.24124], [-81.59801, 30.24135]]
+    },
+    "average_speed": 45.4,
+    "record_count": 3,
+    "min_speed": 43.0,
+    "max_speed": 47.35,
+    "speed_stddev": 2.21
+  }
+]
+```
+
+### 2. 🔍 GET `/aggregates/{link_id}` - Single Link Data
+
+Get detailed speed data for a specific link.
+
+**Parameters:**
+- `link_id` (path): The numeric ID of the link
+- `day` (required): Day of the week ("Monday", "Tuesday", etc.)
+- `period` (required): Time period ("AM Peak", "PM Peak", "Midday", etc.)
+
+**Example Request:**
+```bash
+# Get AM Peak data for link 16981048 on Monday
+curl "http://localhost:8000/aggregates/16981048?day=Monday&period=AM%20Peak"
+
+# Get Evening data for link 16981074 on Wednesday
+curl "http://localhost:8000/aggregates/16981074?day=Wednesday&period=Evening"
+```
+
+**Example Response:**
+```json
+{
+  "link_id": 16981048,
+  "road_name": "Philips Hwy",
+  "length": 0.009320565,
+  "road_type": null,
+  "speed_limit": null,
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [[-81.59791, 30.24124], [-81.59801, 30.24135]]
+  },
+  "average_speed": 45.4,
+  "record_count": 3,
+  "min_speed": 43.0,
+  "max_speed": 47.35,
+  "speed_stddev": 2.21
+}
+```
+
+### 3. 🐌 GET `/patterns/slow_links/` - Slow Traffic Patterns
+
+Find links with consistently slow traffic patterns.
+
+**Parameters:**
+- `period` (required): Time period ("AM Peak", "PM Peak", "Midday", etc.)
+- `threshold` (required): Maximum average speed to consider "slow" (mph)
+- `min_days` (required): Minimum number of days the link must be slow (1-7)
+
+**Example Request:**
+```bash
+# Find links slower than 15 mph during AM Peak for at least 3 days per week
+curl "http://localhost:8000/patterns/slow_links/?period=AM%20Peak&threshold=15&min_days=3"
+
+# Find links slower than 25 mph during PM Peak for at least 2 days per week
+curl "http://localhost:8000/patterns/slow_links/?period=PM%20Peak&threshold=25&min_days=2"
+```
+
+**Example Response:**
+```json
+[
+  {
+    "link_id": 1313272474,
+    "road_name": "Oyster Creek Rd",
+    "length": 0.176469364,
+    "road_type": null,
+    "speed_limit": null,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [[-81.59376, 30.44053], [-81.5937, 30.44062]]
+    },
+    "average_speed": 10.31,
+    "record_count": 1,
+    "min_speed": 10.31,
+    "max_speed": 10.31,
+    "speed_stddev": null
+  }
+]
+```
+
+### 4. 🗺️ POST `/aggregates/spatial_filter/` - Spatial Query
+
+Get aggregated data for links within a bounding box area (exactly as specified in overview.txt).
+
+**Request Body:**
+```json
+{
+  "day": "Wednesday",
+  "period": "AM Peak",
+  "bbox": [-81.8, 30.1, -81.6, 30.3]
+}
+```
+
+**Example Request:**
+```bash
+curl -X POST "http://localhost:8000/aggregates/spatial_filter/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "day": "Wednesday",
+    "period": "AM Peak",
+    "bbox": [-81.8, 30.1, -81.6, 30.3]
+  }'
+```
+
+**Example Response:**
+```json
+[
+  {
+    "link_id": 1313709937,
+    "road_name": "Walkers Ridge Dr",
+    "length": 0.259733078,
+    "road_type": null,
+    "speed_limit": null,
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [[-81.81882, 30.24779], [-81.81897, 30.25156]]
+    },
+    "average_speed": 13.98,
+    "record_count": 1,
+    "min_speed": 13.98,
+    "max_speed": 13.98,
+    "speed_stddev": null
+  }
+]
+```
+
+### 🚀 Quick API Testing
+
+```bash
+# 1. Test API health
+curl "http://localhost:8000/health"
+
+# 2. Get Monday AM Peak traffic data  
+curl "http://localhost:8000/aggregates/?day=Monday&period=AM%20Peak"
+
+# 3. Get data for a specific link
+curl "http://localhost:8000/aggregates/16981048?day=Monday&period=AM%20Peak"
+
+# 4. Find consistently slow links (under 15 mph during AM Peak for 2+ days)
+curl "http://localhost:8000/patterns/slow_links/?period=AM%20Peak&threshold=15&min_days=2"
+
+# 5. Get data within a geographic area (as per overview.txt specification)
+curl -X POST "http://localhost:8000/aggregates/spatial_filter/" \
+  -H "Content-Type: application/json" \
+  -d '{"day": "Wednesday", "period": "AM Peak", "bbox": [-81.8, 30.1, -81.6, 30.3]}'
+```
+
+### 📖 Interactive API Documentation
+
+Visit http://localhost:8000/docs for interactive Swagger documentation where you can:
+- Test all endpoints directly in your browser
+- View detailed parameter descriptions
+- See response schemas and examples
+- Download OpenAPI specification
+
+## �🔧 Development & Troubleshooting
 
 ### Common Development Tasks
 

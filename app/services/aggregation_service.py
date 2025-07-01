@@ -314,3 +314,95 @@ class AggregationService:
 
         logger.info(f"Found {len(results)} links with consistent slow speeds")
         return results
+
+    def get_spatial_filtered_aggregates(
+        self, day: str, period: str, bbox: List[float]
+    ) -> List[Dict[str, Any]]:
+        """
+        Get aggregated speed data for links intersecting a bounding box.
+
+        Args:
+            day: Day of week (e.g., "Monday")
+            period: Time period (e.g., "AM Peak")
+            bbox: Bounding box as [min_lon, min_lat, max_lon, max_lat]
+
+        Returns:
+            List of aggregated speed data within the bounding box
+        """
+        # Validate parameters
+        day_obj, period_obj = validate_day_period_params(day, period)
+
+        min_lon, min_lat, max_lon, max_lat = bbox
+
+        logger.info(
+            f"Spatial filtering: day={day}, period={period}, bbox=[{min_lon}, {min_lat}, {max_lon}, {max_lat}]"
+        )
+
+        # Create bounding box geometry using PostGIS ST_MakeEnvelope
+        # ST_MakeEnvelope(xmin, ymin, xmax, ymax, srid)
+        from geoalchemy2.functions import ST_Intersects, ST_MakeEnvelope
+
+        # Main query with spatial intersection
+        query = (
+            self.db.query(
+                Link.link_id,
+                Link.road_name,
+                Link.length,
+                Link.road_type,
+                Link.speed_limit,
+                ST_AsGeoJSON(Link.geometry).label("geometry"),
+                func.avg(SpeedRecord.speed).label("average_speed"),
+                func.count(SpeedRecord.id).label("record_count"),
+                func.min(SpeedRecord.speed).label("min_speed"),
+                func.max(SpeedRecord.speed).label("max_speed"),
+                func.stddev(SpeedRecord.speed).label("speed_stddev"),
+            )
+            .join(SpeedRecord, Link.link_id == SpeedRecord.link_id)
+            .filter(
+                and_(
+                    SpeedRecord.day_of_week == day,
+                    SpeedRecord.time_period == period,
+                    # Spatial intersection with bounding box
+                    ST_Intersects(
+                        Link.geometry,
+                        ST_MakeEnvelope(min_lon, min_lat, max_lon, max_lat, 4326),
+                    ),
+                )
+            )
+            .group_by(
+                Link.link_id,
+                Link.road_name,
+                Link.length,
+                Link.road_type,
+                Link.speed_limit,
+                Link.geometry,
+            )
+            .order_by(Link.link_id)
+        )
+
+        results = []
+        for row in query.all():
+            # Parse geometry JSON
+            geometry = json.loads(row.geometry) if row.geometry else None
+
+            result = {
+                "link_id": row.link_id,
+                "road_name": row.road_name,
+                "length": float(row.length) if row.length else None,
+                "road_type": row.road_type,
+                "speed_limit": row.speed_limit,
+                "geometry": geometry,
+                "average_speed": (
+                    round(float(row.average_speed), 2) if row.average_speed else None
+                ),
+                "record_count": row.record_count,
+                "min_speed": round(float(row.min_speed), 2) if row.min_speed else None,
+                "max_speed": round(float(row.max_speed), 2) if row.max_speed else None,
+                "speed_stddev": (
+                    round(float(row.speed_stddev), 2) if row.speed_stddev else None
+                ),
+            }
+            results.append(result)
+
+        logger.info(f"Found {len(results)} segments within spatial bounds")
+        return results

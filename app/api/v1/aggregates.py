@@ -14,6 +14,7 @@ from app.schemas.aggregation import (
     AggregationListResponse,
     DataSummaryResponse,
     SingleLinkAggregateResponse,
+    SpatialFilterRequest,
 )
 from app.services.aggregation_service import AggregationService
 
@@ -271,4 +272,94 @@ async def get_slow_links(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while processing request",
+        )
+
+
+@router.post("/aggregates/spatial_filter/", response_model=List[AggregatedSpeedData])
+async def spatial_filter_aggregates(
+    request: SpatialFilterRequest,
+    db: Session = Depends(get_db),
+    logger: ContextLogger = Depends(get_request_logger),
+) -> List[AggregatedSpeedData]:
+    """
+    Get road segments intersecting the bounding box for the given day and period.
+
+    Filters aggregated speed data by spatial intersection with a bounding box.
+    Useful for analyzing traffic patterns in specific geographic areas.
+
+    Args:
+        request: Spatial filter request containing day, period, and bounding box
+        db: Database session
+        logger: Request-scoped logger
+
+    Returns:
+        List[AggregatedSpeedData]: Road segments within the bounding box
+
+    Raises:
+        HTTPException: If parameters are invalid or bounding box is malformed
+    """
+    logger.info(
+        f"Spatial filtering for day={request.day}, period={request.period}, bbox={request.bbox}",
+        extra={
+            "day": request.day,
+            "period": request.period,
+            "bbox": request.bbox,
+        },
+    )
+
+    try:
+        # Validate bounding box
+        if len(request.bbox) != 4:
+            raise ValueError("Bounding box must contain exactly 4 coordinates")
+
+        min_lon, min_lat, max_lon, max_lat = request.bbox
+
+        # Validate coordinate ranges
+        if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180):
+            raise ValueError("Longitude must be between -180 and 180")
+        if not (-90 <= min_lat <= 90 and -90 <= max_lat <= 90):
+            raise ValueError("Latitude must be between -90 and 90")
+        if min_lon >= max_lon:
+            raise ValueError("min_lon must be less than max_lon")
+        if min_lat >= max_lat:
+            raise ValueError("min_lat must be less than max_lat")
+
+        # Use service layer for business logic
+        service = AggregationService(db)
+        results = service.get_spatial_filtered_aggregates(
+            day=request.day,
+            period=request.period,
+            bbox=request.bbox,
+        )
+
+        # Convert to response objects
+        response_data = [AggregatedSpeedData(**item) for item in results]
+
+        logger.info(
+            f"Found {len(response_data)} segments within bounding box",
+            extra={
+                "count": len(response_data),
+                "day": request.day,
+                "period": request.period,
+                "bbox": request.bbox,
+            },
+        )
+
+        return response_data
+
+    except ValueError as e:
+        logger.warning(f"Invalid parameters: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        logger.error(
+            f"Error in spatial filtering: {str(e)}",
+            extra={
+                "day": request.day,
+                "period": request.period,
+                "bbox": request.bbox,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while processing spatial filter",
         )
