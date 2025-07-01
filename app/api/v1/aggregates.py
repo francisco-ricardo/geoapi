@@ -61,7 +61,7 @@ async def get_aggregates(
         # Convert to response objects
         response_data = [AggregatedSpeedData(**item) for item in aggregated_data]
 
-        # Return direct list for client compatibility (overview.txt requirement)
+        # Return direct list for client compatibility
         logger.info(f"Returned {len(response_data)} aggregated records")
         return response_data
 

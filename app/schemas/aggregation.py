@@ -1,6 +1,8 @@
 """
 Schemas for aggregation endpoints.
-Compatible with client requirements from overview.txt
+
+These schemas define the data structures used for aggregating speed data,
+filtering by spatial bounding box, and summarizing speed records.
 """
 
 from typing import Any, Dict, List, Optional
@@ -11,7 +13,6 @@ from pydantic import BaseModel, Field
 class AggregatedSpeedData(BaseModel):
     """
     Individual aggregated speed data item.
-    Compatible with client notebook requirements from overview.txt:
     - geometry: GeoJSON geometry for MapboxGL
     - average_speed: Average speed for visualization
     - road_name: Road name for display
@@ -64,7 +65,7 @@ class AggregatedSpeedData(BaseModel):
         }
 
 
-# Response types - Direct list/item for client compatibility with overview.txt requirements
+# Response types - Direct list/item for client compatibility
 AggregationListResponse = List[AggregatedSpeedData]  # Direct list for /aggregates/
 SingleLinkAggregateResponse = (
     AggregatedSpeedData  # Single item for /aggregates/{link_id}
@@ -128,7 +129,6 @@ class AggregateQueryParams(BaseModel):
 class SpatialFilterRequest(BaseModel):
     """
     Request body for spatial filtering endpoint.
-    Compatible with overview.txt specification.
     """
 
     day: str = Field(..., description="Day of week (Monday, Tuesday, etc.)")
