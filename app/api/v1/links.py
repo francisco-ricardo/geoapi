@@ -3,10 +3,9 @@ Link endpoints for the API.
 """
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from geoalchemy2 import WKBElement
+from fastapi import APIRouter, Depends, HTTPException, status
 from geoalchemy2.functions import ST_AsGeoJSON, ST_GeomFromGeoJSON
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -14,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db, get_request_logger
 from app.core.logging import ContextLogger
 from app.models.link import Link
-from app.schemas.link import LinkCreate, LinkList, LinkResponse, LinkUpdate
+from app.schemas.link import LinkCreate, LinkResponse
 
 router = APIRouter()
 
