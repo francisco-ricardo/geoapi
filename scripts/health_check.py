@@ -6,10 +6,11 @@ Quick verification that all components are working correctly.
 Perfect for interviewers to validate the setup.
 """
 
-import requests
-import sys
 import json
+import sys
 from datetime import datetime
+
+import requests
 
 
 def check_api_health():
@@ -43,14 +44,17 @@ def check_endpoints():
     """Check main API endpoints."""
     endpoints = [
         ("GET /", "http://localhost:8000/"),
-        ("GET /api/v1/links/", "http://localhost:8000/api/v1/links/")
+        ("GET /links/", "http://localhost:8000/links/"),
+        ("GET /aggregates/summary/", "http://localhost:8000/aggregates/summary/"),
     ]
-    
+
     all_ok = True
-    
+
     for name, url in endpoints:
         try:
-            response = requests.get(url, timeout=5)
+            # Use longer timeout for data endpoints
+            timeout = 10 if "aggregates" in url else 5
+            response = requests.get(url, timeout=timeout)
             if 200 <= response.status_code < 300:
                 print(f"✓ {name}: OK ({response.status_code})")
             else:
@@ -59,7 +63,7 @@ def check_endpoints():
         except requests.RequestException as e:
             print(f"✗ {name}: FAILED - {e}")
             all_ok = False
-    
+
     return all_ok
 
 
@@ -69,21 +73,21 @@ def main():
     print("=" * 40)
     print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
-    
+
     checks = [
         ("API Health", check_api_health),
         ("API Documentation", check_api_docs),
-        ("Main Endpoints", check_endpoints)
+        ("Main Endpoints", check_endpoints),
     ]
-    
+
     all_passed = True
-    
+
     for check_name, check_func in checks:
         print(f"Checking {check_name}...")
         if not check_func():
             all_passed = False
         print()
-    
+
     if all_passed:
         print("🎉 ALL CHECKS PASSED!")
         print("\nAPI is ready for testing!")

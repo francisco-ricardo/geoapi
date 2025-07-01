@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db, get_request_logger
 from app.core.logging import ContextLogger
 from app.schemas.aggregation import (
-    AggregatedSpeedResponse,
+    AggregatedSpeedData,
     AggregationListResponse,
     DataSummaryResponse,
     SingleLinkAggregateResponse,
@@ -58,15 +58,11 @@ async def get_aggregates(
         aggregated_data = aggregation_service.get_aggregated_speeds(day, period)
 
         # Convert to response objects
-        response_data = [AggregatedSpeedResponse(**item) for item in aggregated_data]
+        response_data = [AggregatedSpeedData(**item) for item in aggregated_data]
 
-        # Build final response
-        response = AggregationListResponse(
-            data=response_data, total_count=len(response_data), day=day, period=period
-        )
-
+        # Return direct list for client compatibility (overview.txt requirement)
         logger.info(f"Returned {len(response_data)} aggregated records")
-        return response
+        return response_data
 
     except ValueError as e:
         logger.warning(f"Invalid parameters: {str(e)}")

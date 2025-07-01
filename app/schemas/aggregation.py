@@ -1,5 +1,6 @@
 """
 Schemas for aggregation endpoints.
+Compatible with client requirements from overview.txt
 """
 
 from typing import Any, Dict, List, Optional
@@ -7,8 +8,16 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
-class AggregatedSpeedResponse(BaseModel):
-    """Response schema for aggregated speed data."""
+class AggregatedSpeedData(BaseModel):
+    """
+    Individual aggregated speed data item.
+    Compatible with client notebook requirements from overview.txt:
+    - geometry: GeoJSON geometry for MapboxGL
+    - average_speed: Average speed for visualization
+    - road_name: Road name for display
+    - link_id: Unique identifier
+    - length: Road segment length
+    """
 
     link_id: int = Field(..., description="Unique identifier for the road link")
     road_name: Optional[str] = Field(None, description="Name of the road")
@@ -33,8 +42,6 @@ class AggregatedSpeedResponse(BaseModel):
     speed_stddev: Optional[float] = Field(
         None, description="Standard deviation of speeds"
     )
-    day: str = Field(..., description="Day of week")
-    period: str = Field(..., description="Time period")
 
     class Config:
         schema_extra = {
@@ -53,46 +60,13 @@ class AggregatedSpeedResponse(BaseModel):
                 "min_speed": 22.3,
                 "max_speed": 35.1,
                 "speed_stddev": 4.2,
-                "day": "Monday",
-                "period": "AM Peak",
             }
         }
 
 
-class SingleLinkAggregateResponse(AggregatedSpeedResponse):
-    """Response schema for single link aggregated data."""
-
-    pass
-
-
-class AggregationListResponse(BaseModel):
-    """Response schema for list of aggregated speed data."""
-
-    data: List[AggregatedSpeedResponse] = Field(
-        ..., description="List of aggregated speed data"
-    )
-    total_count: int = Field(..., description="Total number of links")
-    day: str = Field(..., description="Day of week requested")
-    period: str = Field(..., description="Time period requested")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "data": [
-                    {
-                        "link_id": 1148855686,
-                        "road_name": "Main St",
-                        "average_speed": 28.45,
-                        "record_count": 15,
-                        "day": "Monday",
-                        "period": "AM Peak",
-                    }
-                ],
-                "total_count": 1,
-                "day": "Monday",
-                "period": "AM Peak",
-            }
-        }
+# Response types - Direct list/item for client compatibility with overview.txt requirements
+AggregationListResponse = List[AggregatedSpeedData]  # Direct list for /aggregates/
+SingleLinkAggregateResponse = AggregatedSpeedData  # Single item for /aggregates/{link_id}
 
 
 class DataSummaryResponse(BaseModel):

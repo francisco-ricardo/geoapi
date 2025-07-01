@@ -1,7 +1,7 @@
 # GeoSpatial Links API - Development Makefile
 # Commands for development using Docker containers from host
 
-.PHONY: help setup start stop restart logs create-tables ingest-data run-api run-api-dev run-api-prod check-api stop-api restart-api api-status test test-all test-unit test-api health-check clean-db analyze-data verify-db verify-postgis test-coverage test-models test-schemas test-core test-middleware test-database test-logging clean-pycache format format-check type-check type-check-strict sort-imports sort-imports-check quality-check clean-empty-files install-quality-tools
+.PHONY: help setup start stop restart logs create-tables ingest-data run-api run-api-dev run-api-prod check-api stop-api restart-api api-status test test-all test-unit test-api health-check clean-db analyze-data validate-ingestion verify-db verify-postgis test-coverage test-models test-schemas test-core test-middleware test-database test-logging clean-pycache format format-check type-check type-check-strict sort-imports sort-imports-check quality-check clean-empty-files install-quality-tools
 
 # Container names from docker-compose-dev.yml
 API_CONTAINER = geoapi_api_dev
@@ -20,13 +20,17 @@ help:
 	@echo "  setup       - Complete setup (start + tables + ingest)"
 	@echo "  create-tables - Create database tables"
 	@echo "  ingest-data - Ingest Parquet datasets into database"
+	@echo "  validate-ingestion - Validate data ingestion integrity"
+	@echo "  verify-db   - Verify database state"
+	@echo "  verify-postgis - Verify PostGIS spatial data"
 	@echo "  run-api     - Start FastAPI with uvicorn"
 	@echo "  run-api-dev - Start FastAPI in development mode"
 	@echo "  run-api-prod- Start FastAPI in production mode"
-	@echo "  check-api   - Check if API is responding"
+	@echo "  check-api   - Quick check if API is responding (curl /health)"
+	@echo "  api-status  - Show detailed API and container status"
+	@echo "  health-check- Complete health check (API + endpoints + docs)"
 	@echo "  stop-api    - Stop API process (uvicorn)"
 	@echo "  restart-api - Restart API process"
-	@echo "  api-status  - Show API status and endpoints"
 	@echo "  test        - Run unit tests"
 	@echo "  test-all    - Run all unit tests (comprehensive)"
 	@echo "  test-unit   - Run unit tests only"
@@ -46,7 +50,13 @@ help:
 	@echo "  sort-imports-check - Check import sorting"
 	@echo "  quality-check   - Run all quality checks"
 	@echo "  clean-empty-files - Remove empty Python files"
-	@echo "  health-check- Check database and API health"
+	@echo ""
+	@echo "API Health & Status Commands:"
+	@echo "  check-api   - Quick API health check (fast)"
+	@echo "  api-status  - Detailed container and API status"
+	@echo "  health-check- Complete system health validation"
+	@echo ""
+	@echo "Database Commands:"
 	@echo "  clean-db    - Clean database (drop all tables)"
 	@echo "  clean-pycache - Clean Python cache files"
 	@echo "  shell       - Open shell in API container"
@@ -54,6 +64,11 @@ help:
 	@echo "Quick start for new users:"
 	@echo "  make start"
 	@echo "  make setup"
+	@echo ""
+	@echo "API Verification Commands (choose based on your need):"
+	@echo "  check-api   - Fast ping test (just curl /health)"
+	@echo "  api-status  - Container status + API info + endpoints"
+	@echo "  health-check- Full validation (API + docs + all endpoints)"
 	@echo ""
 	@echo "Access points after setup:"
 	@echo "  API: http://localhost:8000"
@@ -124,7 +139,7 @@ run-api-prod:
 
 # Check if API is running
 check-api:
-	@echo "Checking if API is running..."
+	@echo "Quick API health check..."
 	@curl -f http://localhost:8000/health 2>/dev/null && echo "✅ API is running!" || echo "❌ API is not responding"
 
 # Stop API process in container (kill uvicorn)
@@ -137,7 +152,7 @@ restart-api: stop-api run-api-dev
 
 # Show API status and endpoints
 api-status:
-	@echo "=== API Status ==="
+	@echo "=== DETAILED API STATUS ==="
 	@echo "Container status:"
 	@docker ps --filter "name=$(API_CONTAINER)" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 	@echo ""
@@ -196,7 +211,8 @@ test-api: clean-pycache
 
 # Health check
 health-check:
-	@echo "Running health checks..."
+	@echo "Running comprehensive health checks..."
+	@echo "(Tests API health, documentation, and main endpoints)"
 	@docker exec $(API_CONTAINER) python scripts/health_check.py
 
 # Clean database (drop all tables)
@@ -209,14 +225,17 @@ analyze-data:
 	@echo "Analyzing original Parquet datasets..."
 	@docker exec $(API_CONTAINER) python scripts/data/analyze_data.py
 
+# Validate data ingestion integrit
 validate-ingestion:
 	@echo "Validating data ingestion integrity..."
 	@docker exec $(API_CONTAINER) python scripts/data/validate_ingestion.py
 
+# Verify database state
 verify-db:
-	@echo "Verifying database state..."
+	@echo "..."
 	@docker exec $(API_CONTAINER) python scripts/database/verify_database.py
 
+# Verify PostGIS spatial data
 verify-postgis:
 	@echo "Verifying PostGIS spatial data..."
 	@docker exec $(API_CONTAINER) python scripts/database/verify_postgis.py

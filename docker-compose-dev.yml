@@ -37,28 +37,22 @@ services:
     tty: true # Allocate a pseudo-TTY for better terminal experience
 
   notebook:
-    image: python:3.9-slim
+    image: jupyter/scipy-notebook:latest
     container_name: geoapi_notebook_dev
-    working_dir: /workspace
+    working_dir: /home/jovyan/work
+    user: root
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
     command: >
       bash -c "
-        echo 'Installing Jupyter and mapboxgl...' &&
-        pip install --no-cache-dir --upgrade pip &&
-        pip install --no-cache-dir 'ipython==7.34.0' &&
-        pip install --no-cache-dir 'jupyterlab==3.6.7' &&
-        pip install --no-cache-dir 'requests==2.28.0' &&
-        pip install --no-cache-dir 'pandas==1.5.3' &&
-        pip install --no-cache-dir 'geopandas==0.12.2' &&
-        pip install --no-cache-dir 'shapely==1.8.5' &&
-        pip install --no-cache-dir 'numpy==1.24.0' &&
-        pip install --no-cache-dir 'mapboxgl==0.10.2' &&
-        echo 'Testing mapboxgl import...' &&
-        python -c 'from mapboxgl.viz import ChoroplethViz; print(\"Mapboxgl working!\")' &&
+        echo 'Installing required packages...' &&
+        pip install --no-cache-dir requests pandas mapboxgl folium &&
         echo 'Starting Jupyter Lab...' &&
-        jupyter lab --ip=0.0.0.0 --port=8888 --allow-root --ServerApp.token='' --ServerApp.password=''
+        start-notebook.sh --NotebookApp.token='' --NotebookApp.password='' --ip=0.0.0.0 --port=8888 --allow-root
       "
     volumes:
-      - ./:/workspace:delegated
+      - ./:/home/jovyan/work:delegated
     ports:
       - "8888:8888"
     depends_on:

@@ -60,3 +60,10 @@ coverage.xml
 **/test_*.py
 !tests/unit/**/test_*.py
 !tests/fixtures/**/test_*.py
+
+# Ignore problematic files that VS Code recreates
+mapbox_patch.py
+scripts/data/verify_ingestion.py
+
+# Ignore all notebooks in notebooks folder (will be recreated by user)
+notebooks/*.ipynb
