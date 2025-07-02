@@ -9,7 +9,6 @@
 [![Pydantic](https://img.shields.io/badge/Pydantic-2.11.1-E92063.svg?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/latest/)
 
 [![pytest](https://img.shields.io/badge/pytest-8.4.1-0A9EDC.svg?style=flat-square&logo=pytest&logoColor=white)](https://docs.pytest.org/)
-[![Coverage](https://img.shields.io/badge/Coverage-66%25-yellow.svg?style=flat-square)](#test-coverage)
 [![Type Checking](https://img.shields.io/badge/Type%20Checking-mypy-1674b1.svg?style=flat-square&logo=mypy&logoColor=white)](http://mypy-lang.org/)
 
 [![Pandas](https://img.shields.io/badge/Pandas-2.3.0-150458.svg?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
@@ -59,7 +58,7 @@ approach for better debugging and flexibility.
 # Check if everything is working
 make api-status         # Complete status check
 make check-api          # Quick API health check
-make test               # Run tests to verify setup
+make test               # Run unit tests
 ```
 
 ### 📝 Command Summary
@@ -564,37 +563,6 @@ Coverage reports are generated in multiple formats:
 - **Fast Execution**: Optimized test suite with efficient database handling
 - **Zero Fragmentation**: Completely reorganized from fragmented legacy structure
 - **100% Pass Rate**: All 118 tests pass consistently
-
-### Test System Reorganization ✅
-
-The testing system underwent a **complete reorganization** to eliminate fragmentation and establish a professional, maintainable structure:
-
-#### Before vs After
-
-| Aspect | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Files** | 25+ fragmented files | 15 organized files | 60% reduction |
-| **Structure** | Scattered, duplicated | Domain-driven, clean | Professional |
-| **Pass Rate** | Inconsistent failures | 100% passing | Reliable |
-| **Coverage** | Gaps and overlaps | Comprehensive | Complete |
-| **Maintenance** | Difficult | Easy | Sustainable |
-
-#### Key Improvements
-
-- ✅ **Eliminated Fragmentation**: Removed 16+ fragmented test files (`*_additional.py`, `*_extended.py`, etc.)
-- ✅ **Domain Organization**: Tests organized by functional domain (core, models, schemas, middleware)
-- ✅ **Centralized Fixtures**: All test fixtures consolidated in `tests/fixtures/`
-- ✅ **Foreign Key Fixes**: Resolved all database constraint issues
-- ✅ **Clean Documentation**: Comprehensive testing architecture documentation
-
-### Test Development Guidelines
-
-1. **Domain Separation**: Keep tests organized by functional domain
-2. **Fixture Reuse**: Leverage shared fixtures from `tests/fixtures/`
-3. **Descriptive Names**: Use clear, descriptive test method names
-4. **Edge Cases**: Always test boundary conditions and error states
-5. **Documentation**: Include docstrings explaining test purpose
-6. **Clean Code**: Follow SOLID principles and DRY methodology
 
 ## 🔍 Data Validation
 
