@@ -10,10 +10,7 @@
 
 [![pytest](https://img.shields.io/badge/pytest-8.4.1-0A9EDC.svg?style=flat-square&logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Coverage](https://img.shields.io/badge/Coverage-66%25-yellow.svg?style=flat-square)](#test-coverage)
-[![Test Status](https://img.shields.io/badge/Tests-118%20Passing-success.svg?style=flat-square&logo=pytest&logoColor=white)](#testing-system)
-[![Code Style](https://img.shields.io/badge/Code%20Style-Black-000000.svg?style=flat-square&logo=black&logoColor=white)](https://github.com/psf/black)
 [![Type Checking](https://img.shields.io/badge/Type%20Checking-mypy-1674b1.svg?style=flat-square&logo=mypy&logoColor=white)](http://mypy-lang.org/)
-[![Quality Gate](https://img.shields.io/badge/Quality%20Gate-Passing-brightgreen.svg?style=flat-square)](#code-quality)
 
 [![Pandas](https://img.shields.io/badge/Pandas-2.3.0-150458.svg?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 [![Shapely](https://img.shields.io/badge/Shapely-2.1.1-blue.svg?style=flat-square)](https://shapely.readthedocs.io/)
@@ -24,20 +21,16 @@
 
 [![API Docs](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D.svg?style=flat-square&logo=swagger&logoColor=white)](http://localhost:8000/docs)
 [![DevContainer](https://img.shields.io/badge/DevContainer-Ready-purple.svg?style=flat-square&logo=visualstudiocode&logoColor=white)](.devcontainer/)
-[![Docker Build](https://img.shields.io/badge/Docker%20Build-Passing-success.svg?style=flat-square&logo=docker&logoColor=white)](docker-compose-dev.yml)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean-blue.svg?style=flat-square)](#project-structure)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg?style=flat-square)](#quick-start-for-interviewers)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square&logo=opensourceinitiative&logoColor=white)](LICENSE)
 
-[![Performance](https://img.shields.io/badge/Performance-3.5x%20Faster-brightgreen.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-optimization-big-data-ingestion)
-[![Memory](https://img.shields.io/badge/Memory%20Usage-50%25%20Reduction-blue.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
+
 [![Throughput](https://img.shields.io/badge/Throughput-3K%20Records%2Fs-orange.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 [![Big Data](https://img.shields.io/badge/Big%20Data-1.2M%2B%20Records-red.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 [![Reliability](https://img.shields.io/badge/Reliability-Zero%20Failures-success.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 
 A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQL/PostGIS**, and **Pydantic** for traffic data analysis and visualization.
 
-## 🚀 Quick Start (For Interviewers)
+## 🚀 Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose installed on your host machine
@@ -45,22 +38,21 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 
 ### Setup and Run
 ```bash
-# 1. Start the containers (database + API container)
-make start
-
-# 2. Complete setup (tables + data ingestion)
+# 1. Complete setup (start the containers + create tables + data ingestion)
 make setup
+make validate-ingestion # Validate data ingestion integrity
 
-# 3. Start the API with uvicorn
+# 2. Start the API with uvicorn
 make run-api-dev        # Recommended for development (auto-reload + debug)
 
-# 4. Access the API
+# 3. Access the API
 # - API Server: http://localhost:8000
 # - API Documentation: http://localhost:8000/docs
 # - Health Check: http://localhost:8000/health
 ```
 
-> **📋 Note**: The API container starts but doesn't auto-run the FastAPI app, giving you control over when and how to start it (dev/prod mode). This is a professional practice for better debugging and flexibility.
+> **📋 Note**: The API container starts but doesn't auto-run the FastAPI app, giving you control over when and how to start it (dev/prod mode). This is an
+approach for better debugging and flexibility.
 
 ### Quick Verification
 ```bash
@@ -90,16 +82,12 @@ make start              # Start containers (DB + prepare API container)
 make create-tables      # Create database tables
 make ingest-data        # Load Parquet datasets
 
-# API Management - PROFESSIONAL WORKFLOW
+# API Management
 make run-api-dev        # Start FastAPI in development mode (RECOMMENDED)
 make check-api          # Check if API is responding
 make stop-api           # Stop API process (uvicorn)
 make restart-api        # Restart API process
 make api-status         # Show API status and endpoints
-
-# Legacy/Alternative API commands
-make run-api            # Basic FastAPI start
-make run-api-prod       # Start FastAPI in production mode
 
 # Development commands
 make logs              # View container logs
@@ -663,113 +651,39 @@ make verify-db         # Verify database state
 make verify-postgis    # Verify PostGIS spatial data
 ```
 
-## ⚠️ Known Issues
+## 🗄️ Database Schema
 
-### ~~Field Naming Inconsistency - Speed Data~~ ✅ RESOLVED
+The GeoAPI uses a well-designed relational schema optimized for geospatial traffic data. The database consists of two main entities with a one-to-many relationship.
 
-**Previous Issue**: There was a naming inconsistency between database schema files and the actual implementation.
+### Entity Relationship Diagram
 
-**Resolution Applied**: All components now use consistent `speed` field naming:
+![Database Schema - Entity Relationship Diagram](docs/geoapi_der.drawio.png)
 
-- ✅ **`docker/init.sql`**: Uses `speed` column  
-- ✅ **SQLAlchemy Model**: Uses `speed` attribute mapping to `speed` column
-- ✅ **Pydantic Schema**: Uses `speed` field name
-- ✅ **Database**: Uses `speed` column
-- ✅ **Tests**: Use `speed` field
+### Schema Overview
 
-**Current Status**: 
-- ✅ System is **fully functional** - all endpoints work correctly
-- ✅ Complete field naming consistency achieved
-- ✅ Model ↔ Schema conversion working perfectly
-- ✅ All tests passing (118/118)
+**Links Table (`links`)**
+- Stores road segment information with PostGIS geometry
+- Primary key: `link_id` (integer)
+- Contains road metadata: name, type, speed limit, length
+- Geometry stored as `LINESTRING` in WGS84 (SRID 4326)
 
-**Resolution Method**: Updated Pydantic schemas and tests to use `speed` instead of `speed_kph`, maintaining database compatibility without requiring migrations.
-
----
-
-## 📋 Logging and Observability
-
-[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Ready-4287f5.svg?style=flat-square&logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
-[![Correlation IDs](https://img.shields.io/badge/Correlation%20IDs-Enabled-green.svg?style=flat-square)](https://microservices.io/patterns/observability/distributed-tracing.html)
-[![Structured Logging](https://img.shields.io/badge/Structured%20Logging-JSON%20%26%20Console-blue.svg?style=flat-square)](https://12factor.net/logs)
-[![Cloud Ready](https://img.shields.io/badge/Cloud%20Ready-Observability-purple.svg?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/logging)
-
-The API includes a comprehensive logging and observability system:
+**Speed Records Table (`speed_records`)**
+- Stores traffic speed measurements
+- Foreign key reference to `links.link_id`
+- Contains temporal data: timestamp, day of week, time period
+- Speed values in miles per hour (mph)
 
 ### Key Features
 
-- **Structured Logging**: Supports both human-readable console logs and machine-parseable JSON format
-- **Correlation IDs**: Every request gets a unique ID that is propagated through all logs
-- **Request/Response Logging**: Automatic logging of all HTTP requests with timing and performance metrics
-- **Cloud-Ready**: Designed for integration with cloud observability platforms
-- **Contextual Logging**: Endpoint handlers can access request-scoped loggers with correlation IDs
+- **Referential Integrity**: All speed records reference valid links with CASCADE delete
+- **Spatial Indexing**: Optimized GIST indexes on geometry columns for fast spatial queries
+- **Temporal Indexing**: Indexes on timestamp and temporal classification fields
+- **Data Validation**: Built-in constraints ensure data quality (speed ranges, positive lengths, etc.)
+- **PostGIS Integration**: Full spatial data support with geometry validation and transformation
 
-### Configuration
+### Database Technologies
 
-Logging can be configured via environment variables:
-
-```bash
-# Logging configuration
-GEOAPI_LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-GEOAPI_LOG_FORMAT=console  # console or json
-GEOAPI_LOG_TO_FILE=false  # true or false
-GEOAPI_LOG_FILE_PATH=/var/log/geoapi/app.log  # Path for file logging
-
-# Observability settings
-GEOAPI_ENABLE_TRACING=false  # Enable distributed tracing
-GEOAPI_TRACING_PROVIDER=otlp  # otlp, jaeger, honeycomb
-GEOAPI_TRACING_ENDPOINT=http://localhost:4317  # Endpoint for tracing exporter
-```
-
-### Log Formats
-
-#### Development Mode (Console)
-```
-2025-06-29 10:15:23,456 [INFO] geoapi.request:42 - Request started: GET /api/v1/links
-2025-06-29 10:15:23,512 [INFO] geoapi.request:98 - Request completed: GET /api/v1/links - 200
-```
-
-#### Production Mode (JSON)
-```json
-{
-  "timestamp": "2025-06-29T10:15:23.456Z",
-  "level": "INFO",
-  "message": "Request completed: GET /api/v1/links - 200",
-  "logger": "geoapi.request",
-  "location": {
-    "module": "logging_middleware",
-    "function": "dispatch",
-    "line": 98
-  },
-  "correlation_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
-  "http": {
-    "method": "GET",
-    "url": "http://localhost:8000/api/v1/links",
-    "status_code": 200,
-    "response_time": 0.056,
-    "request_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
-  },
-  "event": "request_completed",
-  "performance": {
-    "response_time": 0.056
-  }
-}
-```
-
-### Usage in Code
-
-```python
-# In FastAPI endpoints
-@app.get("/items/{item_id}")
-async def get_item(
-    item_id: int, 
-    logger: ContextLogger = Depends(get_request_logger)
-):
-    logger.info(f"Processing item {item_id}")
-    
-    # Add context for this specific operation
-    operation_logger = logger.with_context({"operation": "get_item"})
-    operation_logger.debug("Detailed operation info", extra={"item_id": item_id})
-    
-    return {"item_id": item_id}
-```
+- **PostgreSQL 16**: Primary database engine
+- **PostGIS 3.5**: Geospatial extension for spatial data types and operations
+- **SQLAlchemy 2.0**: ORM with modern async support
+- **GeoAlchemy2**: Spatial extension for SQLAlchemy with PostGIS integration
