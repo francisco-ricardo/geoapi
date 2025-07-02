@@ -995,31 +995,28 @@ Authorization:
 > **📊 Current State**: The MVP efficiently handles 1.3M+ records with optimized chunk processing. Production scaling would implement the enterprise-grade solutions below.
 
 ### 🏗️ **Horizontal Scaling Architecture**
-```yaml
-# Production Scaling Strategy (Implementation Roadmap)
-Database Tier:
+
+- **Database Tier**:
   - PostgreSQL cluster with read replicas
   - Horizontal partitioning by geographic regions
   - Connection pooling with PgBouncer
   - Automated failover and backup strategies
 
-Application Tier:
+- **Application Tier**:
   - Microservices with independent scaling
-  - Load balancing with session affinity
+  - Load balancing
   - Auto-scaling based on CPU/memory metrics
   
-Caching Layer:
+- **Caching Layer**:
   - Redis cluster for session management
   - Geospatial query result caching
   - CDN for static assets and documentation
   - Application-level caching strategies
-```
 
 ### 📊 **Database Optimization**
 - **Query Optimization**: Advanced query planning and execution optimization
 - **Partitioning**: Time-based and geographic data partitioning
 - **Materialized Views**: Pre-computed aggregations for complex analytics
-- **Connection Management**: Advanced pooling and connection lifecycle management
 
 ### 🔧 **Application Performance**
 - **Async Processing**: Non-blocking I/O with FastAPI async capabilities
