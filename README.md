@@ -288,37 +288,6 @@ make validate-ingestion # Validate data ingestion integrity
 
 ```
 
-### API Development Workflow
-
-```bash
-# Quick Start for API Development
-make start              # 1. Start containers (PostgreSQL + API container)
-make run-api-dev        # 2. Start FastAPI with auto-reload and debug
-make check-api          # 3. Verify API is responding
-# Daily Development Cycle
-make run-api-dev        # Start API in development mode
-# Make code changes... (auto-reload active)
-make test               # Run tests
-make check-api          # Verify API still works
-# API Status and Debugging
-make api-status         # Show complete API status
-make logs               # View container logs for debugging
-make restart-api        # Restart if needed
-
-```
-
-### API Management Commands
-
-| Command | Purpose | When to Use |
-|---------|---------|-------------|
-| `make run-api-dev` | Start FastAPI with auto-reload + debug | **Development** (recommended) |
-| `make run-api` | Start FastAPI with auto-reload | Basic development |
-| `make run-api-prod` | Start FastAPI with 4 workers | Production testing |
-| `make check-api` | Test if API responds | Quick health check |
-| `make api-status` | Complete status (container + API + endpoints) | Troubleshooting |
-| `make stop-api` | Stop uvicorn process | Stop API without stopping containers |
-| `make restart-api` | Restart API process | After configuration changes |
-
 ### Access Points
 - **API Server**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs  
@@ -541,28 +510,31 @@ The project includes a **Jupyter Notebook** demonstrating real-world API usage w
 
 - **Data Analysis**: Pandas-based data processing and tabular summaries
 
-- **Real Data**: Uses Monday AM Peak traffic data from Jacksonville, FL
-
 **🚀 Quick Start**:
 
 ```bash
 # Start the API first
 make setup && make run-api-dev
+
 # Open the notebook in VS Code or Jupyter
 code notebooks/notebook_1.ipynb
+
 # Or run Jupyter Lab
 jupyter lab notebooks/notebook_1.ipynb
 ```
 
 **📋 Requirements**:
+
 - API running on `http://localhost:8000` (or update `BASE_URL` in notebook)
 - Optional: Mapbox token for advanced visualizations (placeholder provided)
 - Python packages: `requests`, `pandas`, `mapboxgl`, `geopandas`, `shapely`
 
 **💡 Use Cases**:
+
 - **Development Testing**: Interactive testing of API endpoints
 - **Data Analysis**: Exploratory analysis of traffic patterns
 - **Client Examples**: Reference implementation for API consumers
+
 ---
 
 ## 🔧 Development & Troubleshooting
