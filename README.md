@@ -205,9 +205,7 @@ The GeoAPI uses a well-designed relational schema optimized for geospatial traff
 
 ### 🔧 Environment Configuration
 
-**⚠️ CRITICAL**: You must create a `.env` file in the project root before starting the containers. The application will not work without proper environment configuration.
-
-#### Quick Setup Command
+You must create a `.env` file in the project root before starting the containers. The application will not work without proper environment configuration.
 
 ```bash
 # Create .env file with default configuration
