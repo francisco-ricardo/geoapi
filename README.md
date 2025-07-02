@@ -31,7 +31,6 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 
 ### ✨ **Quality Achievements**
 - **109 Tests**: Comprehensive test suite with 100% pass rate
-- **66% Coverage**: Good coverage across all critical components
 - **Zero Technical Debt**: Clean, well-organized codebase following SOLID principles
 - **Performance Optimized**: Handles 1.3M+ records efficiently with chunked processing
 - **Production Ready**: Docker containerized with health checks and monitoring
@@ -48,6 +47,7 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 - **Memory Efficient**: Chunked processing with automatic garbage collection
 - **Integrity Validation**: Comprehensive data validation and consistency checks
 - **Multiple Formats**: Support for Parquet, GeoJSON, and standard database formats
+- **Interactive Visualization**: Jupyter notebook with MapboxGL integration for data exploration
 
 ---
 
@@ -104,6 +104,113 @@ The project follows **Clean Architecture**, **SOLID**, and **KISS** principles w
 - **Middleware Pattern**: Request logging and correlation IDs (`LoggingMiddleware`)
 - **Strategy Pattern**: Environment-specific configurations and database adapters
 - **Singleton Pattern**: Cached database engine and logger instances
+
+### 🏗️ **System Architecture & Data Flow**
+
+The following diagram shows the complete system architecture, including data sources, ingestion pipeline, database integration, API services, and visualization components:
+
+```mermaid
+graph TB
+    %% External Data Sources
+    subgraph "📊 Data Sources"
+        DS1[🌐 Link Info Dataset<br/>link_info.parquet.gz]
+        DS2[🌐 Speed Data Dataset<br/>duval_jan1_2024.parquet.gz]
+    end
+
+    %% Data Ingestion Layer
+    subgraph "🔄 Data Ingestion Pipeline"
+        DI[📝 ingest_datasets.py<br/>• Chunked Processing<br/>• Memory Optimization<br/>• Data Validation]
+        DV[✅ validate_ingestion.py<br/>• Integrity Checks<br/>• Schema Validation<br/>• Statistical Consistency]
+    end
+
+    %% Database Layer
+    subgraph "🗄️ Database Layer (Docker)"
+        subgraph "📊 PostgreSQL + PostGIS"
+            DB[(🗃️ PostgreSQL 16<br/>🌍 PostGIS 3.5)]
+            LT[📋 links Table<br/>• link_id (PK)<br/>• geometry (LINESTRING)<br/>• road_name, type, speed_limit<br/>• GIST spatial indexes]
+            ST[📊 speed_records Table<br/>• link_id (FK)<br/>• timestamp, day_of_week<br/>• speed_mph, time_period<br/>• Temporal indexes]
+        end
+    end
+
+    %% FastAPI Application Layer
+    subgraph "🚀 FastAPI Application (Docker)"
+        subgraph "🔧 Core Layer"
+            CORE[⚙️ Core Services<br/>• Database Connection<br/>• Configuration<br/>• Logging System]
+        end
+        
+        subgraph "📊 Model Layer"
+            MODEL[🏗️ SQLAlchemy Models<br/>• Link Model<br/>• SpeedRecord Model<br/>• Relationships & Constraints]
+        end
+        
+        subgraph "🔄 Services Layer"
+            SERV[🧮 Business Logic<br/>• AggregationService<br/>• Data Processing<br/>• Statistical Calculations]
+        end
+        
+        subgraph "📝 Schema Layer"
+            SCHEMA[📋 Pydantic Schemas<br/>• Request/Response Models<br/>• Data Validation<br/>• Serialization]
+        end
+        
+        subgraph "🛡️ Middleware Layer"
+            MIDDLE[🔍 Request Processing<br/>• Logging Middleware<br/>• Correlation IDs<br/>• Request Tracing]
+        end
+        
+        subgraph "🌐 API Layer"
+            API[🔌 REST Endpoints<br/>• /aggregates/<br/>• /patterns/slow_links/<br/>• /spatial_filter/<br/>• OpenAPI/Swagger]
+        end
+    end
+
+    %% Consumption Layer
+    subgraph "📈 Data Consumption"
+        NB[📓 Jupyter Notebook<br/>notebook_1.ipynb<br/>• API Integration<br/>• MapboxGL Visualization<br/>• Interactive Analysis]
+        CLI[💻 API Clients<br/>• curl commands<br/>• HTTP requests<br/>• External applications]
+        DOCS[📚 Interactive Docs<br/>• Swagger UI<br/>• API Testing<br/>• Schema Documentation]
+    end
+
+    %% Data Flow Arrows
+    DS1 -->|Download & Parse| DI
+    DS2 -->|Download & Parse| DI
+    DI -->|Bulk Insert<br/>Chunked Processing| LT
+    DI -->|Bulk Insert<br/>1.3M+ Records| ST
+    DI -->|Validation| DV
+    DV -->|Integrity Check| DB
+    
+    LT -.->|1:N Relationship| ST
+    
+    CORE -->|Connection Pool| DB
+    MODEL -->|ORM Queries| DB
+    SERV -->|Business Logic| MODEL
+    SCHEMA -->|Validation| SERV
+    MIDDLE -->|Processing| SCHEMA
+    API -->|HTTP Layer| MIDDLE
+    
+    API -->|JSON Responses| NB
+    API -->|REST API| CLI
+    API -->|Documentation| DOCS
+    
+    %% Styling
+    classDef dataSource fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef processing fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef database fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef fastapi fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef consumption fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class DS1,DS2 dataSource
+    class DI,DV processing
+    class DB,LT,ST database
+    class CORE,MODEL,SERV,SCHEMA,MIDDLE,API fastapi
+    class NB,CLI,DOCS consumption
+```
+
+**📋 Architecture Highlights:**
+
+- **🔄 Data Pipeline**: Complete ETL process from external Parquet files to PostGIS database
+- **🏗️ Clean Architecture**: Layered FastAPI application following SOLID principles  
+- **🗄️ Spatial Database**: PostgreSQL + PostGIS with optimized indexes for geospatial queries
+- **📊 Big Data Processing**: Handles 1.3M+ records with chunked processing and memory optimization
+- **🌐 RESTful API**: FastAPI with automatic OpenAPI documentation and validation
+- **📈 Data Visualization**: Jupyter notebook with MapboxGL for interactive geospatial analysis
+- **🔍 Observability**: Comprehensive logging, correlation IDs, and request tracing
+- **🐳 Containerized**: Full Docker setup with PostgreSQL and FastAPI services
 
 ---
 
@@ -517,6 +624,49 @@ Visit http://localhost:8000/docs for interactive Swagger documentation where you
 - View detailed parameter descriptions
 - See response schemas and examples
 - Download OpenAPI specification
+
+### 📊 Data Visualization Notebook
+
+The project includes a **Jupyter Notebook** demonstrating real-world API usage with geospatial visualization:
+
+**📍 Location**: `notebooks/notebook_1.ipynb`
+
+**🎯 Purpose**: Complete example showing how to:
+- Consume API endpoints programmatically
+- Process geospatial traffic data
+- Create interactive maps with Mapbox GL
+- Generate data analysis summaries
+
+**🔧 Features**:
+- **API Integration**: Demonstrates GET requests to `/aggregates/` endpoint
+- **MapboxGL Visualization**: Interactive choropleth maps showing traffic speeds
+- **Data Analysis**: Pandas-based data processing and tabular summaries
+- **Real Data**: Uses Monday AM Peak traffic data from Jacksonville, FL
+
+**🚀 Quick Start**:
+```bash
+# Start the API first
+make setup && make run-api-dev
+
+# Open the notebook in VS Code or Jupyter
+code notebooks/notebook_1.ipynb
+
+# Or run Jupyter Lab
+jupyter lab notebooks/notebook_1.ipynb
+```
+
+**📋 Requirements**:
+- API running on `http://localhost:8000` (or update `BASE_URL` in notebook)
+- Optional: Mapbox token for advanced visualizations (placeholder provided)
+- Python packages: `requests`, `pandas`, `mapboxgl`, `geopandas`, `shapely`
+
+**💡 Use Cases**:
+- **Interview Demonstrations**: Live API consumption and visualization
+- **Development Testing**: Interactive testing of API endpoints
+- **Data Analysis**: Exploratory analysis of traffic patterns
+- **Client Examples**: Reference implementation for API consumers
+
+> **Note**: This notebook follows the exact pattern specified in the original requirements, providing a complete example of API integration with geospatial visualization capabilities.
 
 ---
 
