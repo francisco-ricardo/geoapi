@@ -86,31 +86,21 @@ The project follows **Clean Architecture**, **SOLID**, and **KISS** principles w
 ### 🏗️ **System Architecture & Data Flow**
 The following diagram shows the complete system architecture, including data sources, ingestion pipeline, database integration, API services, and visualization components:
 ```mermaid
-flowchart LR
-    A[🌐 External Data Sources] 
-    B[📥 Data Processing Pipeline]
-    C[(🗄️ PostgreSQL Database)]
-    D[🚀 FastAPI Application]
-    E[📊 Jupyter Notebook]
-    F[💻 External Clients]
-    G[📚 API Documentation]
-    A -->|Download Parse| B
-    B -->|1.3M Records| C
-    C -->|SQL Queries| D
-    D -->|JSON Response| E
-    D -->|REST API| F  
-    D -->|Swagger UI| G
-    classDef source fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
-    classDef process fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px  
-    classDef database fill:#e8f5e8,stroke:#388e3c,stroke-width:3px
-    classDef api fill:#fff3e0,stroke:#f57c00,stroke-width:3px
-    classDef consume fill:#fce4ec,stroke:#c2185b,stroke-width:3px
-    class A source
-    class B process
-    class C database  
-    class D api
-    class E,F,G consume
+graph LR
+    A[External Data Sources] --> B[Data Processing Pipeline]
+    B --> C[(PostgreSQL Database)]
+    C --> D[FastAPI Application]
+    D --> E[Jupyter Notebook]
+    D --> F[External Clients]
+    D --> G[API Documentation]
 ```
+
+**🔄 Data Flow Overview:**
+- **📊 External Data Sources**: Parquet files from CDN (Link Info + Speed Data)
+- **🔄 Data Processing Pipeline**: Python scripts for ingestion, validation and chunked processing
+- **🗄️ PostgreSQL Database**: PostGIS-enabled database with 1.3M+ traffic records
+- **🚀 FastAPI Application**: REST API with 4 endpoints for traffic analysis
+- **📈 Data Consumption**: Jupyter notebook, external clients, and interactive documentation
 ### 🎯 **Simplified Architecture Flow**
 ```
 📊 DATA SOURCES                🔄 PROCESSING               🗄️ DATABASE
