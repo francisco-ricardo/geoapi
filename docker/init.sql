@@ -1,3 +1,7 @@
+-- NOTE: This file serves as initial database setup documentation.
+-- The actual database schema is controlled by SQLAlchemy models.
+-- Some field names here may differ from the final implementation.
+
 -- Enable PostGIS extension for geospatial data support
 CREATE EXTENSION IF NOT EXISTS postgis;
 
@@ -22,8 +26,9 @@ CREATE TABLE IF NOT EXISTS speed_records (
     id SERIAL PRIMARY KEY,
     link_id INTEGER NOT NULL REFERENCES links(link_id) ON DELETE CASCADE,
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    speed_kph REAL NOT NULL CHECK (speed_kph >= 0 AND speed_kph <= 300),
-    period VARCHAR(20)
+    speed REAL NOT NULL CHECK (speed >= 0 AND speed <= 300),
+    day_of_week VARCHAR(20),
+    time_period VARCHAR(20)
 );
 
 -- Create spatial index for better performance
@@ -39,10 +44,10 @@ INSERT INTO links (link_id, road_name, length, road_type, speed_limit, geometry)
 ON CONFLICT (link_id) DO NOTHING;
 
 -- Insert sample speed records
-INSERT INTO speed_records (link_id, timestamp, speed_kph, period) VALUES
-(12345, NOW() - INTERVAL '1 hour', 45.5, 'afternoon'),
-(12345, NOW() - INTERVAL '2 hours', 52.0, 'afternoon'),
-(12346, NOW() - INTERVAL '30 minutes', 68.2, 'afternoon'),
-(12347, NOW() - INTERVAL '15 minutes', 32.1, 'afternoon')
+INSERT INTO speed_records (link_id, timestamp, speed, day_of_week, time_period) VALUES
+(12345, NOW() - INTERVAL '1 hour', 45.5, 'Monday', 'PM Peak'),
+(12345, NOW() - INTERVAL '2 hours', 52.0, 'Monday', 'PM Peak'),
+(12346, NOW() - INTERVAL '30 minutes', 68.2, 'Monday', 'PM Peak'),
+(12347, NOW() - INTERVAL '15 minutes', 32.1, 'Monday', 'PM Peak')
 ON CONFLICT DO NOTHING;
 

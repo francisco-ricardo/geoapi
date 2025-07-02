@@ -10,7 +10,7 @@ from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
 from app.core.logging import get_logger
-from app.core.time_periods import DayOfWeek, TimePeriod, validate_day_period_params
+from app.core.time_periods import validate_day_period_params
 from app.models.link import Link
 from app.models.speed_record import SpeedRecord
 
@@ -67,7 +67,7 @@ class AggregationService:
             .filter(
                 and_(
                     SpeedRecord.time_period == period_obj.period_name,
-                    # Note: day_of_week field is empty in current data,
+                    # day_of_week field is empty in current data,
                     # so we'll skip this filter for now
                     # SpeedRecord.day_of_week == day_obj.day_name
                 )
@@ -258,7 +258,7 @@ class AggregationService:
             return []
 
         # Now get the aggregated data for these links for the specified period
-        # We'll use the average across all available days for this period
+        # Use the average across all available days for this period
         query = (
             self.db.query(
                 Link.link_id,
