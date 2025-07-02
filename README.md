@@ -19,26 +19,33 @@
 [![Throughput](https://img.shields.io/badge/Throughput-3K%20Records%2Fs-orange.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 [![Big Data](https://img.shields.io/badge/Big%20Data-1.2M%2B%20Records-red.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 [![Reliability](https://img.shields.io/badge/Reliability-Zero%20Failures-success.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
+
 A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQL/PostGIS**, and **Pydantic** for traffic data analysis and visualization.
+
 ## 🏆 Project Highlights
+
 ### ✨ **Quality Achievements**
 - **109 Tests**: Comprehensive test suite with 100% pass rate
 - **Zero Technical Debt**: Clean, well-organized codebase following SOLID principles
 - **Performance Optimized**: Handles 1.3M+ records efficiently with chunked processing
 - **Production Ready**: Docker containerized with health checks and monitoring
+
 ### 🚀 **Technical Excellence**
 - **Clean Architecture**: Domain-driven design with clear separation of concerns
 - **Type Safety**: Full typing support with mypy validation
 - **Observability**: Structured logging with correlation IDs and request tracing
 - **Geospatial Ready**: PostGIS integration with GeoJSON support
 - **DevOps Ready**: Complete Docker setup with development containers
+
 ### 📊 **Data Processing Capabilities**
 - **Big Data Handling**: Optimized for processing millions of records
 - **Memory Efficient**: Chunked processing with automatic garbage collection
 - **Integrity Validation**: Comprehensive data validation and consistency checks
 - **Multiple Formats**: Support for Parquet, GeoJSON, and standard database formats
 - **Interactive Visualization**: Jupyter notebook with MapboxGL integration for data exploration
+
 ---
+
 ## 🔌 Technologies
 ### Core Stack
 - **Backend**: FastAPI, SQLAlchemy 2.0, Pydantic v2
@@ -52,10 +59,14 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 - **Documentation**: FastAPI auto-docs, Swagger UI, comprehensive docstrings
 - **Performance**: SQLAlchemy bulk operations, memory-optimized data processing
 - **Observability**: Structured logging, correlation IDs, request tracing
+
 ---
+
 ## 🏗️ Architecture
 The project follows **Clean Architecture**, **SOLID**, and **KISS** principles with a layered approach:
+
 ### 📊 **Application Layers**
+
 ```
 ┌─────────────────────────────────────────┐
 │                API Layer                │  ← FastAPI endpoints, validation
@@ -77,60 +88,20 @@ The project follows **Clean Architecture**, **SOLID**, and **KISS** principles w
 │           (app/core/*.py)               │
 └─────────────────────────────────────────┘
 ```
+
 ### 🔧 **Design Patterns Implemented**
 - **Factory Pattern**: Database engine and session creation (`get_engine()`, `get_session_factory()`)
 - **Dependency Injection**: FastAPI DI system for configuration and database dependencies
 - **Middleware Pattern**: Request logging and correlation IDs (`LoggingMiddleware`)
 - **Strategy Pattern**: Environment-specific configurations and database adapters
 - **Singleton Pattern**: Cached database engine and logger instances
+
 ### 🏗️ **System Architecture & Data Flow**
+
 The following diagram shows the complete system architecture, including data sources, ingestion pipeline, database integration, API services, and visualization components:
 
 ![Architecture Diagram](docs/geoapi_architecture.drawio.png)
 
-
-```mermaid
-graph LR
-    A[External Data Sources] --> B[Data Processing Pipeline]
-    B --> C[(PostgreSQL Database)]
-    C --> D[FastAPI Application]
-    D --> E[Jupyter Notebook]
-    D --> F[External Clients]
-    D --> G[API Documentation]
-```
-
-**🔄 Data Flow Overview:**
-- **📊 External Data Sources**: Parquet files from CDN (Link Info + Speed Data)
-- **🔄 Data Processing Pipeline**: Python scripts for ingestion, validation and chunked processing
-- **🗄️ PostgreSQL Database**: PostGIS-enabled database with 1.3M+ traffic records
-- **🚀 FastAPI Application**: REST API with 4 endpoints for traffic analysis
-- **📈 Data Consumption**: Jupyter notebook, external clients, and interactive documentation
-### 🎯 **Simplified Architecture Flow**
-```
-📊 DATA SOURCES                🔄 PROCESSING               🗄️ DATABASE
-┌─────────────────┐           ┌─────────────────┐          ┌─────────────────┐
-│  🌐 Link Info   │──────────▶│  📥 Ingestion   │─────────▶│  🗃️ PostgreSQL │
-│     Dataset     │           │     Scripts     │          │   + PostGIS     │
-└─────────────────┘           │                 │          │                 │
-┌─────────────────┐           │  • Chunked      │          │  📋 links       │
-│  🌐 Speed Data  │──────────▶│  • Validated    │          │  📊 speed_rec   │
-│     Dataset     │           │  • 1.3M+ rows   │          │  🔗 Relations   │
-└─────────────────┘           └─────────────────┘          └─────────────────┘
-                                       │                            │
-                                       ▼                            ▼
-🚀 API LAYER                    📈 DATA CONSUMPTION         🔍 VALIDATION
-┌─────────────────┐           ┌─────────────────┐          ┌─────────────────┐
-│  🌐 FastAPI     │◀──────────│  📊 Jupyter     │          │  ✅ Integrity   │
-│                 │           │     Notebook    │          │     Checks      │
-│  • REST API     │           │                 │          │                 │
-│  • 4 Endpoints  │           │  🗺️ MapboxGL    │          │  📊 Statistics  │
-│  • OpenAPI      │           │     Visualization│          │  🔗 References  │
-│  • Auto Docs    │           └─────────────────┘          └─────────────────┘
-└─────────────────┘           ┌─────────────────┐
-        │                     │  💻 External    │
-        └────────────────────▶│     Clients     │
-                              └─────────────────┘
-```
 **📋 Architecture Highlights:**
 - **🔄 Data Pipeline**: Complete ETL process from external Parquet files to PostGIS database
 - **🏗️ Clean Architecture**: Layered FastAPI application following SOLID principles  
@@ -140,8 +111,11 @@ graph LR
 - **📈 Data Visualization**: Jupyter notebook with MapboxGL for interactive geospatial analysis
 - **🔍 Observability**: Comprehensive logging, correlation IDs, and request tracing
 - **🐳 Containerized**: Full Docker setup with PostgreSQL and FastAPI services
+
 ---
+
 ## 📊 Code Quality
+
 ### Quality Metrics & Standards
 - ✅ **Type Safety**: 100% mypy type checking coverage
 - ✅ **Code Style**: Black formatting with consistent style
@@ -149,7 +123,9 @@ graph LR
 - ✅ **Test Coverage**: 66% overall coverage with domain-specific targets
 - ✅ **Architecture**: Clean architecture with domain separation
 - ✅ **Documentation**: Comprehensive docstrings and API documentation
+
 ### Quality Commands
+
 ```bash
 # Code formatting
 make format              # Format code with Black
@@ -163,54 +139,72 @@ make sort-imports-check  # Check import sorting
 # Combined quality check
 make quality-check       # Run all quality checks
 ```
+
 ### Code Quality Tools
+
 | Tool | Purpose | Configuration | Status |
 |------|---------|---------------|--------|
 | **Black** | Code formatting | Line length: 88 | ✅ Configured |
 | **mypy** | Type checking | Strict mode | ✅ Configured |
 | **isort** | Import sorting | Black compatible | ✅ Configured |
 | **pytest** | Testing framework | Coverage enabled | ✅ 109 tests |
+
 ### Quality Gates
 - All code must pass Black formatting
 - All code must pass mypy type checking
 - All tests must pass (100% success rate)
 - New code should maintain or improve coverage
 - All commits should follow conventional commit format
+
 ---
+
 ## 🗄️ Database Schema
 The GeoAPI uses a well-designed relational schema optimized for geospatial traffic data. The database consists of two main entities with a one-to-many relationship.
+
 ### Entity Relationship Diagram
 ![Database Schema - Entity Relationship Diagram](docs/geoapi_der.drawio.png)
+
 ### Schema Overview
+
 **Links Table (`links`)**
 - Stores road segment information with PostGIS geometry
 - Primary key: `link_id` (integer)
 - Contains road metadata: name, type, speed limit, length
 - Geometry stored as `LINESTRING` in WGS84 (SRID 4326)
+
 **Speed Records Table (`speed_records`)**
 - Stores traffic speed measurements
 - Foreign key reference to `links.link_id`
 - Contains temporal data: timestamp, day of week, time period
 - Speed values in miles per hour (mph)
+
 ### Key Features
 - **Referential Integrity**: All speed records reference valid links with CASCADE delete
 - **Spatial Indexing**: Optimized GIST indexes on geometry columns for fast spatial queries
 - **Temporal Indexing**: Indexes on timestamp and temporal classification fields
 - **Data Validation**: Built-in constraints ensure data quality (speed ranges, positive lengths, etc.)
 - **PostGIS Integration**: Full spatial data support with geometry validation and transformation
+
 ### Database Technologies
 - **PostgreSQL 16**: Primary database engine
 - **PostGIS 3.5**: Geospatial extension for spatial data types and operations
 - **SQLAlchemy 2.0**: ORM with modern async support
 - **GeoAlchemy2**: Spatial extension for SQLAlchemy with PostGIS integration
+
 ---
+
 ## 🚀 Quick Start
+
 ### Prerequisites
 - Docker and Docker Compose installed on your host machine
 - Clone this repository
+
 ### 🔧 Environment Configuration
+
 **⚠️ CRITICAL**: You must create a `.env` file in the project root before starting the containers. The application will not work without proper environment configuration.
+
 #### Quick Setup Command
+
 ```bash
 # Create .env file with default configuration
 # Replace `your_mapbox_token_here` with your token
@@ -226,7 +220,9 @@ GEOAPI_LINK_INFO_URL=https://cdn.urbansdk.com/data-engineering-interview/link_in
 GEOAPI_SPEED_DATA_URL=https://cdn.urbansdk.com/data-engineering-interview/duval_jan1_2024.parquet.gz
 EOF
 ```
+
 ### Setup and Run
+
 ```bash
 # 1. Complete setup (start the containers + create tables + data ingestion)
 make setup
@@ -238,16 +234,21 @@ make run-api-dev        # Recommended for development (auto-reload + debug)
 # - API Documentation: http://localhost:8000/docs
 # - Health Check: http://localhost:8000/health
 ```
+
 > **📋 Note**: The API container starts but doesn't auto-run the FastAPI app, giving you control over when and how to start it (dev/prod mode). This is an
 approach for better debugging and flexibility.
+
 ### Quick Verification
+
 ```bash
 # Check if everything is working
 make api-status         # Complete status check
 make check-api          # Quick API health check
 make test               # Run unit tests
 ```
+
 ### 📝 Command Summary
+
 | Command | Description | Use Case |
 |---------|-------------|----------|
 | `make start` | Start containers (DB + API container) | Initial setup |
@@ -258,7 +259,9 @@ make test               # Run unit tests
 | `make api-status` | Complete status (container + API + endpoints) | Troubleshooting |
 | `make test` | Run unit tests | Verify functionality |
 | `make logs` | View container logs | Debugging |
+
 ### Alternative Commands
+
 ```bash
 # Step by step setup
 make start              # Start containers (DB + prepare API container)
@@ -278,8 +281,11 @@ make test              # Run tests
 make health-check      # Check system health
 # Data validation
 make validate-ingestion # Validate data ingestion integrity
+
 ```
+
 ### API Development Workflow
+
 ```bash
 # Quick Start for API Development
 make start              # 1. Start containers (PostgreSQL + API container)
@@ -294,8 +300,11 @@ make check-api          # Verify API still works
 make api-status         # Show complete API status
 make logs               # View container logs for debugging
 make restart-api        # Restart if needed
+
 ```
+
 ### API Management Commands
+
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
 | `make run-api-dev` | Start FastAPI with auto-reload + debug | **Development** (recommended) |
@@ -305,26 +314,36 @@ make restart-api        # Restart if needed
 | `make api-status` | Complete status (container + API + endpoints) | Troubleshooting |
 | `make stop-api` | Stop uvicorn process | Stop API without stopping containers |
 | `make restart-api` | Restart API process | After configuration changes |
+
 ### Access Points
 - **API Server**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs  
 - **Health Check**: http://localhost:8000/health
+
 ---
+
 ## � API Endpoints
 The GeoAPI provides 4 main endpoints for traffic data analysis and geospatial querying. All endpoints return JSON responses and follow RESTful conventions.
+
 ### 1. 📊 GET `/aggregates/` - Daily Speed Aggregates
+
 Get aggregated speed data for all links on a specific day and time period.
+
 **Parameters:**
 - `day` (required): Day of the week ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 - `period` (required): Time period ("Overnight", "Early Morning", "AM Peak", "Midday", "Early Afternoon", "PM Peak", "Evening")
+
 **Example Request:**
+
 ```bash
 # Get AM Peak data for Monday
 curl "http://localhost:8000/aggregates/?day=Monday&period=AM%20Peak"
 # Get Evening data for Friday
 curl "http://localhost:8000/aggregates/?day=Friday&period=Evening"
 ```
+
 **Example Response:**
+
 ```json
 [
   {
@@ -344,21 +363,28 @@ curl "http://localhost:8000/aggregates/?day=Friday&period=Evening"
     "speed_stddev": 2.21
   }
 ]
+
 ```
+
 ### 2. 🔍 GET `/aggregates/{link_id}` - Single Link Data
 Get detailed speed data for a specific link.
+
 **Parameters:**
 - `link_id` (path): The numeric ID of the link
 - `day` (required): Day of the week ("Monday", "Tuesday", etc.)
 - `period` (required): Time period ("AM Peak", "PM Peak", "Midday", etc.)
+
 **Example Request:**
+
 ```bash
 # Get AM Peak data for link 16981048 on Monday
 curl "http://localhost:8000/aggregates/16981048?day=Monday&period=AM%20Peak"
 # Get Evening data for link 16981074 on Wednesday
 curl "http://localhost:8000/aggregates/16981074?day=Wednesday&period=Evening"
 ```
+
 **Example Response:**
+
 ```json
 {
   "link_id": 16981048,
@@ -377,13 +403,18 @@ curl "http://localhost:8000/aggregates/16981074?day=Wednesday&period=Evening"
   "speed_stddev": 2.21
 }
 ```
+
 ### 3. 🐌 GET `/patterns/slow_links/` - Slow Traffic Patterns
+
 Find links with consistently slow traffic patterns.
+
 **Parameters:**
 - `period` (required): Time period ("AM Peak", "PM Peak", "Midday", etc.)
 - `threshold` (required): Maximum average speed to consider "slow" (mph)
 - `min_days` (required): Minimum number of days the link must be slow (1-7)
+
 **Example Request:**
+
 ```bash
 # Find links slower than 15 mph during AM Peak for at least 3 days per week
 curl "http://localhost:8000/patterns/slow_links/?period=AM%20Peak&threshold=15&min_days=3"
