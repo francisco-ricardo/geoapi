@@ -1,0 +1,49 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.4.0 Safari/537.36" version="27.0.9">
+  <diagram name="Page-1" id="1Y82Z4Jobzjsm7QOte0F">
+    <mxGraphModel dx="1892" dy="626" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="7AK0jNgnpcL7k5fj5J2--1" target="7AK0jNgnpcL7k5fj5J2--2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--1" value="External&amp;nbsp;&lt;div&gt;Data Sources&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-40" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="7AK0jNgnpcL7k5fj5J2--2" target="7AK0jNgnpcL7k5fj5J2--3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--2" value="Data Processing&lt;div&gt;Pipeline&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-40" y="170" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="7AK0jNgnpcL7k5fj5J2--3" target="7AK0jNgnpcL7k5fj5J2--4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--3" value="PostgreSQL" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-25" y="270" width="90" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="7AK0jNgnpcL7k5fj5J2--4" target="7AK0jNgnpcL7k5fj5J2--5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="7AK0jNgnpcL7k5fj5J2--4" target="7AK0jNgnpcL7k5fj5J2--6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="7AK0jNgnpcL7k5fj5J2--4" target="7AK0jNgnpcL7k5fj5J2--7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--4" value="FastAPI&lt;div&gt;Application&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-40" y="410" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--5" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;Jupyter&lt;div&gt;Notebook&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-210" y="520" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--6" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;External Clients&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-40" y="520" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7AK0jNgnpcL7k5fj5J2--7" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;API Documentation&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="120" y="520" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

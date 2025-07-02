@@ -85,6 +85,10 @@ The project follows **Clean Architecture**, **SOLID**, and **KISS** principles w
 - **Singleton Pattern**: Cached database engine and logger instances
 ### 🏗️ **System Architecture & Data Flow**
 The following diagram shows the complete system architecture, including data sources, ingestion pipeline, database integration, API services, and visualization components:
+
+![Architecture Diagram](docs/geoapi_architecture.drawio.png)
+
+
 ```mermaid
 graph LR
     A[External Data Sources] --> B[Data Processing Pipeline]
