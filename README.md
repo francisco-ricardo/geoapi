@@ -112,65 +112,65 @@ The following diagram shows the complete system architecture, including data sou
 ```mermaid
 graph TB
     %% External Data Sources
-    subgraph "📊 Data Sources"
-        DS1[🌐 Link Info Dataset<br/>link_info.parquet.gz]
-        DS2[🌐 Speed Data Dataset<br/>duval_jan1_2024.parquet.gz]
+    subgraph "Data Sources"
+        DS1["🌐 Link Info Dataset"]
+        DS2["🌐 Speed Data Dataset"]
     end
 
     %% Data Ingestion Layer
-    subgraph "🔄 Data Ingestion Pipeline"
-        DI[📝 ingest_datasets.py<br/>• Chunked Processing<br/>• Memory Optimization<br/>• Data Validation]
-        DV[✅ validate_ingestion.py<br/>• Integrity Checks<br/>• Schema Validation<br/>• Statistical Consistency]
+    subgraph "Data Ingestion Pipeline"
+        DI["📝 ingest_datasets.py"]
+        DV["✅ validate_ingestion.py"]
     end
 
     %% Database Layer
-    subgraph "🗄️ Database Layer (Docker)"
-        subgraph "📊 PostgreSQL + PostGIS"
-            DB[(🗃️ PostgreSQL 16<br/>🌍 PostGIS 3.5)]
-            LT[📋 links Table<br/>• link_id (PK)<br/>• geometry (LINESTRING)<br/>• road_name, type, speed_limit<br/>• GIST spatial indexes]
-            ST[📊 speed_records Table<br/>• link_id (FK)<br/>• timestamp, day_of_week<br/>• speed_mph, time_period<br/>• Temporal indexes]
+    subgraph "Database Layer"
+        subgraph "PostgreSQL PostGIS"
+            DB[("🗃️ PostgreSQL 16 + PostGIS 3.5")]
+            LT["📋 links Table"]
+            ST["📊 speed_records Table"]
         end
     end
 
     %% FastAPI Application Layer
-    subgraph "🚀 FastAPI Application (Docker)"
-        subgraph "🔧 Core Layer"
-            CORE[⚙️ Core Services<br/>• Database Connection<br/>• Configuration<br/>• Logging System]
+    subgraph "FastAPI Application"
+        subgraph "Core Layer"
+            CORE["⚙️ Core Services"]
         end
         
-        subgraph "📊 Model Layer"
-            MODEL[🏗️ SQLAlchemy Models<br/>• Link Model<br/>• SpeedRecord Model<br/>• Relationships & Constraints]
+        subgraph "Model Layer"
+            MODEL["🏗️ SQLAlchemy Models"]
         end
         
-        subgraph "🔄 Services Layer"
-            SERV[🧮 Business Logic<br/>• AggregationService<br/>• Data Processing<br/>• Statistical Calculations]
+        subgraph "Services Layer"
+            SERV["🧮 Business Logic"]
         end
         
-        subgraph "📝 Schema Layer"
-            SCHEMA[📋 Pydantic Schemas<br/>• Request/Response Models<br/>• Data Validation<br/>• Serialization]
+        subgraph "Schema Layer"
+            SCHEMA["📋 Pydantic Schemas"]
         end
         
-        subgraph "🛡️ Middleware Layer"
-            MIDDLE[🔍 Request Processing<br/>• Logging Middleware<br/>• Correlation IDs<br/>• Request Tracing]
+        subgraph "Middleware Layer"
+            MIDDLE["🛡️ Request Processing"]
         end
         
-        subgraph "🌐 API Layer"
-            API[🔌 REST Endpoints<br/>• /aggregates/<br/>• /patterns/slow_links/<br/>• /spatial_filter/<br/>• OpenAPI/Swagger]
+        subgraph "API Layer"
+            API["🌐 REST Endpoints"]
         end
     end
 
     %% Consumption Layer
-    subgraph "📈 Data Consumption"
-        NB[📓 Jupyter Notebook<br/>notebook_1.ipynb<br/>• API Integration<br/>• MapboxGL Visualization<br/>• Interactive Analysis]
-        CLI[💻 API Clients<br/>• curl commands<br/>• HTTP requests<br/>• External applications]
-        DOCS[📚 Interactive Docs<br/>• Swagger UI<br/>• API Testing<br/>• Schema Documentation]
+    subgraph "Data Consumption"
+        NB["📓 Jupyter Notebook"]
+        CLI["💻 API Clients"]
+        DOCS["📚 Interactive Docs"]
     end
 
     %% Data Flow Arrows
     DS1 -->|Download & Parse| DI
     DS2 -->|Download & Parse| DI
-    DI -->|Bulk Insert<br/>Chunked Processing| LT
-    DI -->|Bulk Insert<br/>1.3M+ Records| ST
+    DI -->|Bulk Insert| LT
+    DI -->|Bulk Insert 1.3M+ Records| ST
     DI -->|Validation| DV
     DV -->|Integrity Check| DB
     
