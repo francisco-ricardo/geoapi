@@ -22,6 +22,8 @@
 
 A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQL/PostGIS**, and **Pydantic** for traffic data analysis and visualization.
 
+---
+
 ## 🏆 Project Highlights
 
 ### ✨ **Quality Achievements**
@@ -323,6 +325,7 @@ make restart-api        # Restart if needed
 ---
 
 ## � API Endpoints
+
 The GeoAPI provides 4 main endpoints for traffic data analysis and geospatial querying. All endpoints return JSON responses and follow RESTful conventions.
 
 ### 1. 📊 GET `/aggregates/` - Daily Speed Aggregates
@@ -442,8 +445,11 @@ curl "http://localhost:8000/patterns/slow_links/?period=PM%20Peak&threshold=25&m
   }
 ]
 ```
+
 ### 4. 🗺️ POST `/aggregates/spatial_filter/` - Spatial Query
+
 Get aggregated data for links within a bounding box area.
+
 **Request Body:**
 ```json
 {
@@ -483,7 +489,9 @@ curl -X POST "http://localhost:8000/aggregates/spatial_filter/" \
   }
 ]
 ```
+
 ### 🚀 Quick API Testing
+
 ```bash
 # 1. Test API health
 curl "http://localhost:8000/health"
@@ -498,13 +506,17 @@ curl -X POST "http://localhost:8000/aggregates/spatial_filter/" \
   -H "Content-Type: application/json" \
   -d '{"day": "Wednesday", "period": "AM Peak", "bbox": [-81.8, 30.1, -81.6, 30.3]}'
 ```
+
 ### 📖 Interactive API Documentation
+
 Visit http://localhost:8000/docs for interactive Swagger documentation where you can:
 - Test all endpoints directly in your browser
 - View detailed parameter descriptions
 - See response schemas and examples
 - Download OpenAPI specification
+
 ### 📊 Data Visualization Notebook
+
 The project includes a **Jupyter Notebook** demonstrating real-world API usage with geospatial visualization:
 **📍 Location**: `notebooks/notebook_1.ipynb`
 **🎯 Purpose**: Complete example showing how to:
@@ -512,12 +524,15 @@ The project includes a **Jupyter Notebook** demonstrating real-world API usage w
 - Process geospatial traffic data
 - Create interactive maps with Mapbox GL
 - Generate data analysis summaries
+
 **🔧 Features**:
 - **API Integration**: Demonstrates GET requests to `/aggregates/` endpoint
 - **MapboxGL Visualization**: Interactive choropleth maps showing traffic speeds
 - **Data Analysis**: Pandas-based data processing and tabular summaries
 - **Real Data**: Uses Monday AM Peak traffic data from Jacksonville, FL
+
 **🚀 Quick Start**:
+
 ```bash
 # Start the API first
 make setup && make run-api-dev
@@ -526,10 +541,12 @@ code notebooks/notebook_1.ipynb
 # Or run Jupyter Lab
 jupyter lab notebooks/notebook_1.ipynb
 ```
+
 **📋 Requirements**:
 - API running on `http://localhost:8000` (or update `BASE_URL` in notebook)
 - Optional: Mapbox token for advanced visualizations (placeholder provided)
 - Python packages: `requests`, `pandas`, `mapboxgl`, `geopandas`, `shapely`
+
 **💡 Use Cases**:
 - **Interview Demonstrations**: Live API consumption and visualization
 - **Development Testing**: Interactive testing of API endpoints
@@ -537,8 +554,11 @@ jupyter lab notebooks/notebook_1.ipynb
 - **Client Examples**: Reference implementation for API consumers
 > **Note**: This notebook follows the exact pattern specified in the original requirements, providing a complete example of API integration with geospatial visualization capabilities.
 ---
+
 ## �🔧 Development & Troubleshooting
+
 ### Common Development Tasks
+
 ```bash
 # Start development environment
 make start && make run-api-dev
@@ -552,45 +572,60 @@ make type-check            # Type checking with mypy
 make sort-imports          # Sort imports with isort
 make quality-check         # All quality checks combined
 ```
+
 ### Troubleshooting Guide
+
 #### ⚙️ Configuration Issues
+
 ```bash
 # Check if .env file exists and has correct values
 ls -la .env                # Verify .env file exists
 cat .env                   # Check environment variables
 make health-check          # Verify configuration is loaded correctly
 ```
+
 **Common Configuration Problems:**
 - ❌ **Missing `.env` file**: Create `.env` file in project root using the template above
 - ❌ **Wrong database URL**: Ensure `GEOAPI_DATABASE_URL` matches Docker container settings
 - ❌ **Invalid port configuration**: Check `GEOAPI_API_PORT` is set to `8000`
 - ❌ **Missing data source URLs**: Verify both `GEOAPI_LINK_INFO_URL` and `GEOAPI_SPEED_DATA_URL` are set
+
 #### API Not Responding
+
 ```bash
 make api-status            # Check status
 make logs                  # View logs
 make restart-api           # Restart API process
 ```
+
 #### Container Issues
+
 ```bash
 make restart               # Restart all containers
 make logs                  # Check container logs
 make shell                 # Debug inside container
 ```
+
 #### Database Issues
+
 ```bash
 make db-shell              # Open PostgreSQL shell
 make health-check          # Check database connectivity
 make clean-db              # Clean database (careful!)
 ```
+
 #### Development Issues
+
 ```bash
 make clean-empty-files     # Remove VS Code empty files
 make clean-pycache         # Clean Python cache
 make format                # Fix code formatting
 ```
+
 ---
+
 ## 🧪 Testing System
+
 ```bash
 # Code formatting
 make format              # Format code with Black
@@ -604,21 +639,27 @@ make sort-imports-check  # Check import sorting
 # Combined quality check
 make quality-check       # Run all quality checks
 ```
+
 ### Code Quality Tools
+
 | Tool | Purpose | Configuration | Status |
 |------|---------|---------------|--------|
 | **Black** | Code formatting | Line length: 88 | ✅ Configured |
 | **mypy** | Type checking | Strict mode | ✅ Configured |
 | **isort** | Import sorting | Black compatible | ✅ Configured |
 | **pytest** | Testing framework | Coverage enabled | ✅ 109 tests |
+
 ### Quality Gates
 - All code must pass Black formatting
 - All code must pass mypy type checking
 - All tests must pass (100% success rate)
 - New code should maintain or improve coverage
 - All commits should follow conventional commit format
+
 ---
+
 ## 📂 Project Structure
+
 ```
 app/
 ├── core/
@@ -899,61 +940,82 @@ make format                # Fix code formatting
 ```
 ---
 ## 🚧 Future Work
+
 [![Production Ready](https://img.shields.io/badge/Status-MVP%20Complete-success.svg?style=flat-square&logo=checkmarx&logoColor=white)](#future-work)
 [![Roadmap](https://img.shields.io/badge/Roadmap-Production%20Features-blue.svg?style=flat-square&logo=roadmap&logoColor=white)](#production-roadmap)
+
 This project represents a **comprehensive MVP** demonstrating advanced data engineering and API development capabilities. The following enhancements would be prioritized for production deployment:
+
 ### 🔌 **API Enhancement**
 - **Pagination Optimization**: Cursor-based pagination for large result sets
 - **Response Caching**: Redis-based intelligent caching with geospatial awareness
 - **API Versioning**: Semantic versioning strategy with backward compatibility
+
 ### 🏗️ **Infrastructure & DevOps**
 - **Microservices Architecture**: Domain-driven service decomposition
 - **Container Orchestration**: Kubernetes deployment with auto-scaling
 - **CI/CD Pipeline**: Automated testing, security scanning, and deployment
 - **Multi-Environment Setup**: Development, staging, and production environments
 ---
+
 ## 🔐 Security Considerations
+
 [![Security](https://img.shields.io/badge/Security-Enterprise%20Grade-red.svg?style=flat-square&logo=security&logoColor=white)](#security-implementation)
 [![Compliance](https://img.shields.io/badge/Compliance-Ready-blue.svg?style=flat-square&logo=shield&logoColor=white)](#compliance-features)
+
 > **⚠️ Note**: This MVP focuses on technical architecture and data engineering capabilities. Production security implementation would include comprehensive security measures detailed below.
+
 ### 🛡️ **Authentication & Authorization**
+
 - **Authentication**:
   - JWT/OAuth 2.0 with refresh tokens
   - Role-based access control (RBAC)
   - API key management with rate limiting
+
 - **Authorization**:
   - Fine-grained permissions (read/write/admin)
   - Resource-level access control
+
 ### 🚨 **API Security**
 - **Input Validation**: Comprehensive sanitization and validation
 - **SQL Injection Prevention**: Parameterized queries and ORM protection
 - **Rate Limiting**: Adaptive rate limiting with DDoS protection
 - **CORS Configuration**: Strict cross-origin resource sharing policies
 - **Security Headers**: Implementation of security headers (HSTS, CSP, etc.)
+
 ---
+
 ## ⚡ Performance & Scalability
+
 [![Performance](https://img.shields.io/badge/Performance-Enterprise%20Scale-green.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-optimization)
 [![Scalability](https://img.shields.io/badge/Scalability-Cloud%20Native-blue.svg?style=flat-square&logo=kubernetes&logoColor=white)](#horizontal-scaling)
+
 > **📊 Current State**: The MVP efficiently handles 1.3M+ records with optimized chunk processing. Production scaling would implement the enterprise-grade solutions below.
+
 ### 🏗️ **Horizontal Scaling Architecture**
 - **Database Tier**:
   - PostgreSQL cluster with read replicas
   - Horizontal partitioning by geographic regions
   - Connection pooling with PgBouncer
   - Automated failover and backup strategies
+
 - **Application Tier**:
   - Microservices with independent scaling
   - Load balancing
   - Auto-scaling based on CPU/memory metrics
+
 - **Caching Layer**:
   - Redis cluster for session management
   - Geospatial query result caching
   - CDN for static assets and documentation
   - Application-level caching strategies
+
 ### 📊 **Database Optimization**
+
 - **Query Optimization**: Advanced query planning and execution optimization
 - **Partitioning**: Time-based and geographic data partitioning
 - **Materialized Views**: Pre-computed aggregations for complex analytics
+
 ### 🔧 **Application Performance**
 - **Async Processing**: Non-blocking I/O with FastAPI async capabilities
 - **Background Tasks**: Celery-based distributed task processing
