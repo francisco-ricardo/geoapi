@@ -14,9 +14,7 @@
 [![Geospatial](https://img.shields.io/badge/Geospatial-GeoJSON-brightgreen.svg?style=flat-square)](https://geojson.org/)
 [![PyArrow](https://img.shields.io/badge/PyArrow-20.0.0-red.svg?style=flat-square)](https://arrow.apache.org/docs/python/)
 [![API Docs](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D.svg?style=flat-square&logo=swagger&logoColor=white)](http://localhost:8000/docs)
-[![DevContainer](https://img.shields.io/badge/DevContainer-Ready-purple.svg?style=flat-square&logo=visualstudiocode&logoColor=white)](.devcontainer/)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean-blue.svg?style=flat-square)](#project-structure)
-[![Throughput](https://img.shields.io/badge/Throughput-3K%20Records%2Fs-orange.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 [![Big Data](https://img.shields.io/badge/Big%20Data-1.2M%2B%20Records-red.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 [![Reliability](https://img.shields.io/badge/Reliability-Zero%20Failures-success.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
 
@@ -183,16 +181,25 @@ The GeoAPI uses a well-designed relational schema optimized for geospatial traff
 - Speed values in miles per hour (mph)
 
 ### Key Features
+
 - **Referential Integrity**: All speed records reference valid links with CASCADE delete
+
 - **Spatial Indexing**: Optimized GIST indexes on geometry columns for fast spatial queries
+
 - **Temporal Indexing**: Indexes on timestamp and temporal classification fields
+
 - **Data Validation**: Built-in constraints ensure data quality (speed ranges, positive lengths, etc.)
+
 - **PostGIS Integration**: Full spatial data support with geometry validation and transformation
 
 ### Database Technologies
+
 - **PostgreSQL 16**: Primary database engine
+
 - **PostGIS 3.5**: Geospatial extension for spatial data types and operations
+
 - **SQLAlchemy 2.0**: ORM with modern async support
+
 - **GeoAlchemy2**: Spatial extension for SQLAlchemy with PostGIS integration
 
 ---
