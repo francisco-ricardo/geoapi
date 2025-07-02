@@ -110,95 +110,72 @@ The project follows **Clean Architecture**, **SOLID**, and **KISS** principles w
 The following diagram shows the complete system architecture, including data sources, ingestion pipeline, database integration, API services, and visualization components:
 
 ```mermaid
-graph TB
-    %% External Data Sources
-    subgraph "Data Sources"
-        DS1["🌐 Link Info Dataset"]
-        DS2["🌐 Speed Data Dataset"]
-    end
-
-    %% Data Ingestion Layer
-    subgraph "Data Ingestion Pipeline"
-        DI["📝 ingest_datasets.py"]
-        DV["✅ validate_ingestion.py"]
-    end
-
-    %% Database Layer
-    subgraph "Database Layer"
-        subgraph "PostgreSQL PostGIS"
-            DB[("🗃️ PostgreSQL 16 + PostGIS 3.5")]
-            LT["📋 links Table"]
-            ST["📊 speed_records Table"]
-        end
-    end
-
-    %% FastAPI Application Layer
-    subgraph "FastAPI Application"
-        subgraph "Core Layer"
-            CORE["⚙️ Core Services"]
-        end
-        
-        subgraph "Model Layer"
-            MODEL["🏗️ SQLAlchemy Models"]
-        end
-        
-        subgraph "Services Layer"
-            SERV["🧮 Business Logic"]
-        end
-        
-        subgraph "Schema Layer"
-            SCHEMA["📋 Pydantic Schemas"]
-        end
-        
-        subgraph "Middleware Layer"
-            MIDDLE["🛡️ Request Processing"]
-        end
-        
-        subgraph "API Layer"
-            API["🌐 REST Endpoints"]
-        end
-    end
-
-    %% Consumption Layer
-    subgraph "Data Consumption"
-        NB["📓 Jupyter Notebook"]
-        CLI["💻 API Clients"]
-        DOCS["📚 Interactive Docs"]
-    end
-
-    %% Data Flow Arrows
-    DS1 -->|Download & Parse| DI
-    DS2 -->|Download & Parse| DI
-    DI -->|Bulk Insert| LT
-    DI -->|Bulk Insert 1.3M+ Records| ST
-    DI -->|Validation| DV
-    DV -->|Integrity Check| DB
+flowchart LR
+    %% Data Sources
+    A[🌐 External Data<br/>Parquet Files] 
     
-    LT -.->|1:N Relationship| ST
+    %% Processing
+    B[📥 Data Ingestion<br/>Python Scripts]
     
-    CORE -->|Connection Pool| DB
-    MODEL -->|ORM Queries| DB
-    SERV -->|Business Logic| MODEL
-    SCHEMA -->|Validation| SERV
-    MIDDLE -->|Processing| SCHEMA
-    API -->|HTTP Layer| MIDDLE
+    %% Database
+    C[(�️ PostgreSQL<br/>+ PostGIS)]
     
-    API -->|JSON Responses| NB
-    API -->|REST API| CLI
-    API -->|Documentation| DOCS
+    %% API Application  
+    D[🚀 FastAPI<br/>REST API]
+    
+    %% Consumption
+    E[📊 Data Analysis<br/>Jupyter Notebook]
+    F[💻 API Clients<br/>External Apps]
+    G[📚 Documentation<br/>Swagger UI]
+    
+    %% Flow
+    A -->|Download & Parse| B
+    B -->|1.3M+ Records| C
+    C -->|SQL Queries| D
+    D -->|JSON API| E
+    D -->|REST Endpoints| F  
+    D -->|Interactive Docs| G
     
     %% Styling
-    classDef dataSource fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef processing fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef database fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef fastapi fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef consumption fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef source fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef process fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px  
+    classDef database fill:#e8f5e8,stroke:#388e3c,stroke-width:3px
+    classDef api fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    classDef consume fill:#fce4ec,stroke:#c2185b,stroke-width:3px
     
-    class DS1,DS2 dataSource
-    class DI,DV processing
-    class DB,LT,ST database
-    class CORE,MODEL,SERV,SCHEMA,MIDDLE,API fastapi
-    class NB,CLI,DOCS consumption
+    class A source
+    class B process
+    class C database  
+    class D api
+    class E,F,G consume
+```
+
+### 🎯 **Simplified Architecture Flow**
+
+```
+📊 DATA SOURCES                🔄 PROCESSING               🗄️ DATABASE
+┌─────────────────┐           ┌─────────────────┐          ┌─────────────────┐
+│  🌐 Link Info   │──────────▶│  📥 Ingestion   │─────────▶│  🗃️ PostgreSQL │
+│     Dataset     │           │     Scripts     │          │   + PostGIS     │
+└─────────────────┘           │                 │          │                 │
+┌─────────────────┐           │  • Chunked      │          │  📋 links       │
+│  🌐 Speed Data  │──────────▶│  • Validated    │          │  📊 speed_rec   │
+│     Dataset     │           │  • 1.3M+ rows   │          │  🔗 Relations   │
+└─────────────────┘           └─────────────────┘          └─────────────────┘
+                                       │                            │
+                                       ▼                            ▼
+🚀 API LAYER                    📈 DATA CONSUMPTION         🔍 VALIDATION
+┌─────────────────┐           ┌─────────────────┐          ┌─────────────────┐
+│  🌐 FastAPI     │◀──────────│  📊 Jupyter     │          │  ✅ Integrity   │
+│                 │           │     Notebook    │          │     Checks      │
+│  • REST API     │           │                 │          │                 │
+│  • 4 Endpoints  │           │  🗺️ MapboxGL    │          │  📊 Statistics  │
+│  • OpenAPI      │           │     Visualization│          │  🔗 References  │
+│  • Auto Docs    │           └─────────────────┘          └─────────────────┘
+└─────────────────┘           ┌─────────────────┐
+        │                     │  💻 External    │
+        └────────────────────▶│     Clients     │
+                              └─────────────────┘
 ```
 
 **📋 Architecture Highlights:**
