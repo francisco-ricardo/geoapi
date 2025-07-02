@@ -724,6 +724,7 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 - **Pagination Optimization**: Cursor-based pagination for large result sets
 - **Response Caching**: Redis-based intelligent caching with geospatial awareness
 - **API Versioning**: Semantic versioning strategy with backward compatibility
+- **Architectural Consistency**: Refactor `/links/` endpoint to follow service layer pattern like `/aggregates/`, moving database queries from controller to service layer with proper exception handling.
 
 ### 🏗️ **Infrastructure & DevOps**
 - **Microservices Architecture**: Domain-driven service decomposition
@@ -801,10 +802,6 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 
 ### 🚀 Performance Optimization: Big Data Ingestion
 
-[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0.41-red.svg?style=flat-square&logo=sqlalchemy)](https://www.sqlalchemy.org/)
-[![Python](https://img.shields.io/badge/Python-3.12-3776ab.svg?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![PostGIS](https://img.shields.io/badge/PostGIS-3.5-4CAF50.svg?style=flat-square)](https://postgis.net/)
 [![Optimization](https://img.shields.io/badge/Optimization-Memory%20%26%20Speed-success.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-results)
 
 During development, we implemented several optimization techniques to handle large-scale data ingestion:
@@ -916,7 +913,7 @@ This optimization approach allowed us to successfully process over **1.3 million
 [![MapboxGL](https://img.shields.io/badge/MapboxGL-Integration-orange.svg?style=flat-square&logo=mapbox&logoColor=white)](#mapboxgl-compatibility)
 [![Problem Solving](https://img.shields.io/badge/Problem%20Solving-Advanced-red.svg?style=flat-square&logo=stack-overflow&logoColor=white)](#technical-analysis)
 
-During development, we encountered and systematically resolved three critical technical challenges that demonstrate advanced data engineering and API development expertise:
+During development, I encountered and resolved three critical technical challenges that demonstrate advanced data engineering and API development expertise:
 
 #### **Challenge 1: MapboxGL ChoroplethViz Compatibility**
 
