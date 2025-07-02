@@ -2,17 +2,19 @@
 Consolidated fixtures for all tests.
 Centralized location for reusable test components.
 """
-import tempfile
+
 import os
-from datetime import datetime, UTC
+import tempfile
+from datetime import UTC, datetime
 from typing import Generator
-import pytest
-from sqlalchemy import create_engine, StaticPool
-from sqlalchemy.orm import sessionmaker, Session
 from unittest.mock import MagicMock
 
+import pytest
+from sqlalchemy import StaticPool, create_engine
+from sqlalchemy.orm import Session, sessionmaker
+
 from app.core.database import Base
-from tests.fixtures.models import SimplifiedLink, SimplifiedSpeedRecord, ModelBase
+from tests.fixtures.models import ModelBase, SimplifiedLink, SimplifiedSpeedRecord
 
 
 @pytest.fixture(scope="function")
@@ -26,16 +28,16 @@ def test_db_simple() -> Generator[Session, None, None]:
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
-        echo=False
+        echo=False,
     )
-    
+
     # Create all tables
     ModelBase.metadata.create_all(bind=engine)
-    
+
     # Create session
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = TestingSessionLocal()
-    
+
     try:
         yield session
     finally:
@@ -43,7 +45,7 @@ def test_db_simple() -> Generator[Session, None, None]:
         ModelBase.metadata.drop_all(bind=engine)
 
 
-@pytest.fixture(scope="function") 
+@pytest.fixture(scope="function")
 def mock_settings():
     """Mock settings for testing without actual configuration dependencies."""
     settings = MagicMock()
@@ -58,11 +60,11 @@ def mock_settings():
 @pytest.fixture(scope="function")
 def temp_log_file():
     """Create a temporary log file for testing file logging."""
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.log') as f:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
         temp_path = f.name
-    
+
     yield temp_path
-    
+
     # Cleanup
     if os.path.exists(temp_path):
         os.remove(temp_path)
@@ -76,7 +78,7 @@ def sample_link_data():
         "road_name": "Test Road",
         "length": 1000.0,
         "road_type": "Highway",
-        "speed_limit": 60
+        "speed_limit": 60,
     }
 
 
@@ -88,7 +90,7 @@ def sample_speed_record_data():
         "timestamp": datetime.now(UTC),
         "speed": 55.5,
         "day_of_week": "Monday",
-        "time_period": "AM Peak"
+        "time_period": "AM Peak",
     }
 
 

@@ -2,9 +2,11 @@
 Simplified models for testing without PostGIS dependencies.
 Centralized location for all test models.
 """
-from datetime import datetime, UTC
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
-from sqlalchemy.orm import relationship, declarative_base
+
+from datetime import UTC, datetime
+
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import declarative_base, relationship
 
 # Create a separate base for test models
 ModelBase = declarative_base()
@@ -12,6 +14,7 @@ ModelBase = declarative_base()
 
 class SimplifiedLink(ModelBase):
     """Simplified Link model for testing without geometry."""
+
     __tablename__ = "test_links"
 
     link_id = Column(Integer, primary_key=True, index=True)
@@ -19,12 +22,10 @@ class SimplifiedLink(ModelBase):
     length = Column(Float, nullable=True)
     road_type = Column(String, nullable=True)
     speed_limit = Column(Integer, nullable=True)
-    
+
     # Relationship with speed records
     speed_records = relationship(
-        "SimplifiedSpeedRecord", 
-        back_populates="link",
-        cascade="all, delete-orphan"
+        "SimplifiedSpeedRecord", back_populates="link", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
@@ -36,20 +37,21 @@ class SimplifiedLink(ModelBase):
 
 class SimplifiedSpeedRecord(ModelBase):
     """Simplified SpeedRecord model for testing."""
+
     __tablename__ = "test_speed_records"
 
     id = Column(Integer, primary_key=True, index=True)
     link_id = Column(
-        Integer, 
+        Integer,
         ForeignKey("test_links.link_id", ondelete="CASCADE"),
         nullable=False,
-        index=True
+        index=True,
     )
     timestamp = Column(DateTime, nullable=True, index=True)
     speed = Column(Float, nullable=False)
     day_of_week = Column(String, nullable=True, index=True)
     time_period = Column(String, nullable=True, index=True)
-    
+
     # Relationship with Link
     link = relationship("SimplifiedLink", back_populates="speed_records")
 
@@ -60,18 +62,18 @@ class SimplifiedSpeedRecord(ModelBase):
         )
 
     def __str__(self) -> str:
-        timestamp_str = 'Unknown' if self.timestamp is None else self.timestamp
+        timestamp_str = "Unknown" if self.timestamp is None else self.timestamp
         return f"Speed {self.speed} mph on link {self.link_id} at {timestamp_str}"
 
     @property
     def formatted_timestamp(self) -> str:
         """Get formatted timestamp string."""
-        timestamp = getattr(self, 'timestamp', None)
+        timestamp = getattr(self, "timestamp", None)
         if timestamp and isinstance(timestamp, datetime):
-            return timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')
+            return timestamp.strftime("%Y-%m-%d %H:%M:%S UTC")
         return "Unknown"
 
     @property
     def is_peak_hour(self) -> bool:
         """Check if this record is from peak hours."""
-        return getattr(self, 'time_period', '') in ["AM Peak", "PM Peak"]
+        return getattr(self, "time_period", "") in ["AM Peak", "PM Peak"]

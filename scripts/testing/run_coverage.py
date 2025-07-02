@@ -12,11 +12,11 @@ Coverage results are available in:
 - HTML report (detailed, in coverage_html/)
 - XML report (for CI integration, in coverage.xml)
 """
+import argparse
+import os
 import subprocess
 import sys
-import argparse
 from pathlib import Path
-import os
 
 
 def run_coverage_test(module=None, category=None):

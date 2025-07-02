@@ -9,6 +9,7 @@ Available models:
 - Link: Road segments with spatial geometry
 - SpeedRecord: Traffic speed measurements
 """
+
 from app.models.link import Link
 from app.models.speed_record import SpeedRecord
 

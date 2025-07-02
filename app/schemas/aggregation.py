@@ -7,7 +7,7 @@ filtering by spatial bounding box, and summarizing speed records.
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AggregatedSpeedData(BaseModel):
@@ -44,8 +44,8 @@ class AggregatedSpeedData(BaseModel):
         None, description="Standard deviation of speeds"
     )
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "link_id": 1148855686,
                 "road_name": "Main St",
@@ -63,6 +63,7 @@ class AggregatedSpeedData(BaseModel):
                 "speed_stddev": 4.2,
             }
         }
+    )
 
 
 # Response types - Direct list/item for client compatibility
@@ -92,8 +93,8 @@ class DataSummaryResponse(BaseModel):
     available_periods: List[str] = Field(..., description="Available time periods")
     available_days: List[str] = Field(..., description="Available days of week")
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "total_speed_records": 1239946,
                 "total_links": 100927,
@@ -113,6 +114,7 @@ class DataSummaryResponse(BaseModel):
                 "available_days": ["Monday"],
             }
         }
+    )
 
 
 # Request schemas for validation
@@ -122,8 +124,9 @@ class AggregateQueryParams(BaseModel):
     day: str = Field(..., description="Day of week (Monday, Tuesday, etc.)")
     period: str = Field(..., description="Time period (AM Peak, PM Peak, etc.)")
 
-    class Config:
-        schema_extra = {"example": {"day": "Monday", "period": "AM Peak"}}
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"day": "Monday", "period": "AM Peak"}}
+    )
 
 
 class SpatialFilterRequest(BaseModel):
@@ -137,11 +140,12 @@ class SpatialFilterRequest(BaseModel):
         ..., description="Bounding box as [min_lon, min_lat, max_lon, max_lat]"
     )
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "day": "Wednesday",
                 "period": "AM Peak",
                 "bbox": [-81.8, 30.1, -81.6, 30.3],
             }
         }
+    )

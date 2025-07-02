@@ -7,11 +7,15 @@ using various PostGIS functions for spatial analysis.
 """
 
 import sys
-sys.path.insert(0, '/workspace')
+
+sys.path.insert(0, "/workspace")
+
+import json
+
+from sqlalchemy import text
 
 from app.core.database import get_session_factory
-from sqlalchemy import text
-import json
+
 
 def print_section(title):
     """Print a formatted section header."""
@@ -19,25 +23,26 @@ def print_section(title):
     print(f" {title}")
     print("=" * 80)
 
+
 def execute_query(session, query, description):
     """Execute a query and display results."""
     print(f"\n{description}")
     print("-" * 60)
-    
+
     try:
         result = session.execute(text(query))
         rows = result.fetchall()
-        
+
         if not rows:
             print("No results returned.")
             return
-        
+
         # Print column headers
-        if hasattr(result, 'keys'):
+        if hasattr(result, "keys"):
             headers = result.keys()
             print(" | ".join(f"{header:<20}" for header in headers))
             print("-" * (22 * len(headers)))
-        
+
         # Print rows
         for row in rows:
             values = []
@@ -50,35 +55,40 @@ def execute_query(session, query, description):
                 else:
                     values.append(str(value))
             print(" | ".join(f"{value:<20}" for value in values))
-            
+
     except Exception as e:
         print(f"Error executing query: {e}")
 
+
 def verify_postgis_geometries():
     """Verify PostGIS geometry data with comprehensive queries."""
-    
+
     print_section("POSTGIS GEOMETRY VERIFICATION")
-    
+
     Session = get_session_factory()
-    
+
     with Session() as session:
-        
+
         # 1. Basic PostGIS information
-        execute_query(session, 
-            "SELECT PostGIS_version();",
-            "1. PostGIS Version Check")
-        
+        execute_query(session, "SELECT PostGIS_version();", "1. PostGIS Version Check")
+
         # 2. Geometry summary
-        execute_query(session, """
+        execute_query(
+            session,
+            """
             SELECT 
                 COUNT(*) as total_links,
                 COUNT(geometry) as links_with_geometry,
                 COUNT(CASE WHEN ST_IsValid(geometry) THEN 1 END) as valid_geometries
             FROM links;
-        """, "2. Geometry Summary")
-        
+        """,
+            "2. Geometry Summary",
+        )
+
         # 3. Geometry types
-        execute_query(session, """
+        execute_query(
+            session,
+            """
             SELECT 
                 ST_GeometryType(geometry) as geom_type,
                 COUNT(*) as count,
@@ -87,10 +97,14 @@ def verify_postgis_geometries():
             FROM links 
             WHERE geometry IS NOT NULL
             GROUP BY ST_GeometryType(geometry);
-        """, "3. Geometry Types and Statistics")
-        
+        """,
+            "3. Geometry Types and Statistics",
+        )
+
         # 4. Sample geometries as WKT
-        execute_query(session, """
+        execute_query(
+            session,
+            """
             SELECT 
                 link_id,
                 road_name,
@@ -100,13 +114,17 @@ def verify_postgis_geometries():
             WHERE geometry IS NOT NULL 
             ORDER BY link_id
             LIMIT 3;
-        """, "4. Sample Geometries (WKT Format)")
-        
+        """,
+            "4. Sample Geometries (WKT Format)",
+        )
+
         # 5. Sample geometries as GeoJSON (more readable)
         print("\n5. Sample Geometries (GeoJSON Format)")
         print("-" * 60)
         try:
-            result = session.execute(text("""
+            result = session.execute(
+                text(
+                    """
                 SELECT 
                     link_id,
                     road_name,
@@ -116,40 +134,52 @@ def verify_postgis_geometries():
                 WHERE geometry IS NOT NULL 
                 ORDER BY link_id
                 LIMIT 3;
-            """))
-            
+            """
+                )
+            )
+
             for row in result:
                 print(f"\nLink ID: {row.link_id}")
                 print(f"Road Name: {row.road_name}")
                 print(f"Length (meters): {row.length_meters}")
-                
+
                 # Pretty print the GeoJSON
                 geojson = json.loads(row.geometry_geojson)
                 print(f"GeoJSON: {json.dumps(geojson, indent=2)}")
                 print("-" * 40)
-                
+
         except Exception as e:
             print(f"Error displaying GeoJSON: {e}")
-        
+
         # 6. Data extent
-        execute_query(session, """
+        execute_query(
+            session,
+            """
             SELECT 
                 ST_AsText(ST_Extent(geometry)) as data_extent
             FROM links;
-        """, "6. Geographic Extent of Data")
-        
+        """,
+            "6. Geographic Extent of Data",
+        )
+
         # 7. Coordinate system
-        execute_query(session, """
+        execute_query(
+            session,
+            """
             SELECT DISTINCT 
                 ST_SRID(geometry) as srid,
                 COUNT(*) as count
             FROM links 
             WHERE geometry IS NOT NULL
             GROUP BY ST_SRID(geometry);
-        """, "7. Coordinate Reference Systems")
-        
+        """,
+            "7. Coordinate Reference Systems",
+        )
+
         # 8. Sample coordinate points
-        execute_query(session, """
+        execute_query(
+            session,
+            """
             SELECT 
                 link_id,
                 road_name,
@@ -162,10 +192,14 @@ def verify_postgis_geometries():
             WHERE geometry IS NOT NULL 
             ORDER BY link_id
             LIMIT 5;
-        """, "8. Sample Start/End Coordinates")
-        
+        """,
+            "8. Sample Start/End Coordinates",
+        )
+
         # 9. Links with speed data
-        execute_query(session, """
+        execute_query(
+            session,
+            """
             SELECT 
                 l.link_id,
                 l.road_name,
@@ -179,24 +213,31 @@ def verify_postgis_geometries():
             HAVING COUNT(s.id) > 0
             ORDER BY avg_speed_mph DESC
             LIMIT 5;
-        """, "9. Links with Speed Data (Top 5 by Average Speed)")
+        """,
+            "9. Links with Speed Data (Top 5 by Average Speed)",
+        )
+
 
 def main():
     """Main verification function."""
     try:
         verify_postgis_geometries()
-        
+
         print_section("VERIFICATION COMPLETED")
         print("\nTo connect to PostgreSQL directly with psql:")
         print("1. From inside the container:")
         print("   psql -h postgres_db -U geoapi -d geoapi_db")
-        print("2. Then run the queries from /workspace/scripts/database/postgis_queries.sql")
+        print(
+            "2. Then run the queries from /workspace/scripts/database/postgis_queries.sql"
+        )
         print("\nPassword: geoapi_password")
-        
+
     except Exception as e:
         print(f"Error during verification: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     main()
