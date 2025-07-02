@@ -197,6 +197,28 @@ The GeoAPI uses a well-designed relational schema optimized for geospatial traff
 - Docker and Docker Compose installed on your host machine
 - Clone this repository
 
+### 🔧 Environment Configuration
+
+**⚠️ CRITICAL**: You must create a `.env` file in the project root before starting the containers. The application will not work without proper environment configuration.
+
+#### Quick Setup Command
+
+```bash
+# Create .env file with default configuration
+# Replace `your_mapbox_token_here` with your token
+cat > .env << 'EOF'
+GEOAPI_DATABASE_URL=postgresql://geoapi:geoapi@db:5432/geoapi
+GEOAPI_API_HOST=0.0.0.0
+GEOAPI_API_PORT=8000
+GEOAPI_DEBUG=true
+GEOAPI_APP_NAME=GeoAPI
+GEOAPI_APP_VERSION=1.0.0
+GEOAPI_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
+GEOAPI_LINK_INFO_URL=https://cdn.urbansdk.com/data-engineering-interview/link_info.parquet.gz
+GEOAPI_SPEED_DATA_URL=https://cdn.urbansdk.com/data-engineering-interview/duval_jan1_2024.parquet.gz
+EOF
+```
+
 ### Setup and Run
 ```bash
 # 1. Complete setup (start the containers + create tables + data ingestion)
@@ -519,6 +541,20 @@ make quality-check         # All quality checks combined
 ```
 
 ### Troubleshooting Guide
+
+#### ⚙️ Configuration Issues
+```bash
+# Check if .env file exists and has correct values
+ls -la .env                # Verify .env file exists
+cat .env                   # Check environment variables
+make health-check          # Verify configuration is loaded correctly
+```
+
+**Common Configuration Problems:**
+- ❌ **Missing `.env` file**: Create `.env` file in project root using the template above
+- ❌ **Wrong database URL**: Ensure `GEOAPI_DATABASE_URL` matches Docker container settings
+- ❌ **Invalid port configuration**: Check `GEOAPI_API_PORT` is set to `8000`
+- ❌ **Missing data source URLs**: Verify both `GEOAPI_LINK_INFO_URL` and `GEOAPI_SPEED_DATA_URL` are set
 
 #### API Not Responding
 ```bash
@@ -959,19 +995,15 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 > **⚠️ Note**: This MVP focuses on technical architecture and data engineering capabilities. Production security implementation would include comprehensive security measures detailed below.
 
 ### 🛡️ **Authentication & Authorization**
-```yaml
-# Production Security Stack (Not Implemented)
-Authentication:
+
+- **Authentication**:
   - JWT/OAuth 2.0 with refresh tokens
   - Role-based access control (RBAC)
   - API key management with rate limiting
 
-Authorization:
+- **Authorization**:
   - Fine-grained permissions (read/write/admin)
   - Resource-level access control
-  - Geospatial data access restrictions
-  - Time-based access controls
-```
 
 ### 🚨 **API Security**
 - **Input Validation**: Comprehensive sanitization and validation
@@ -979,11 +1011,6 @@ Authorization:
 - **Rate Limiting**: Adaptive rate limiting with DDoS protection
 - **CORS Configuration**: Strict cross-origin resource sharing policies
 - **Security Headers**: Implementation of security headers (HSTS, CSP, etc.)
-
-### 🏛️ **Infrastructure Security**
-- **Network Security**: VPC isolation, firewalls, and network segmentation
-- **Database Security**: Connection encryption, user privilege separation
-- **Cloud Security**: IAM roles, resource policies, and security groups
 
 ---
 
@@ -1023,11 +1050,5 @@ Authorization:
 - **Background Tasks**: Celery-based distributed task processing
 - **Memory Management**: Advanced garbage collection and memory profiling
 - **Code Optimization**: Performance profiling and algorithmic improvements
-
-### ☁️ **Cloud-Native Scaling**
-- **Container Orchestration**: Kubernetes with horizontal pod autoscaling
-- **Event-Driven Architecture**: Message queues for decoupled processing
-- **Serverless Integration**: Function-based processing for peak loads
-- **Global Distribution**: Multi-region deployment with data locality
 
 ---
