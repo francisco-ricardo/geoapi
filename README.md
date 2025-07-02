@@ -520,17 +520,27 @@ Visit http://localhost:8000/docs for interactive Swagger documentation where you
 ### 📊 Data Visualization Notebook
 
 The project includes a **Jupyter Notebook** demonstrating real-world API usage with geospatial visualization:
+
 **📍 Location**: `notebooks/notebook_1.ipynb`
+
 **🎯 Purpose**: Complete example showing how to:
+
 - Consume API endpoints programmatically
+
 - Process geospatial traffic data
+
 - Create interactive maps with Mapbox GL
+
 - Generate data analysis summaries
 
 **🔧 Features**:
+
 - **API Integration**: Demonstrates GET requests to `/aggregates/` endpoint
+
 - **MapboxGL Visualization**: Interactive choropleth maps showing traffic speeds
+
 - **Data Analysis**: Pandas-based data processing and tabular summaries
+
 - **Real Data**: Uses Monday AM Peak traffic data from Jacksonville, FL
 
 **🚀 Quick Start**:
