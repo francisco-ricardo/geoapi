@@ -242,47 +242,12 @@ approach for better debugging and flexibility.
 
 ```bash
 # Check if everything is working
-make api-status         # Complete status check
-make check-api          # Quick API health check
+make check-api          # API health check
+make logs               # View container logs
 make test               # Run unit tests
 ```
 
-### 📝 Command Summary
-
-| Command | Description | Use Case |
-|---------|-------------|----------|
-| `make start` | Start containers (DB + API container) | Initial setup |
-| `make setup` | Complete setup (start + tables + data) | First time setup |
-| `make run-api-dev` | Start FastAPI with auto-reload + debug | **Development (RECOMMENDED)** |
-| `make run-api` | Start FastAPI with auto-reload | Basic usage |
-| `make check-api` | Quick API health check | Verify API works |
-| `make api-status` | Complete status (container + API + endpoints) | Troubleshooting |
-| `make test` | Run unit tests | Verify functionality |
-| `make logs` | View container logs | Debugging |
-
-### Alternative Commands
-
-```bash
-# Step by step setup
-make start              # Start containers (DB + prepare API container)
-make create-tables      # Create database tables
-make ingest-data        # Load Parquet datasets
-# API Management
-make run-api-dev        # Start FastAPI in development mode (RECOMMENDED)
-make check-api          # Check if API is responding
-make stop-api           # Stop API process (uvicorn)
-make restart-api        # Restart API process
-make api-status         # Show API status and endpoints
-# Development commands
-make logs              # View container logs
-make shell             # Open shell in API container
-make db-shell          # Open PostgreSQL shell
-make test              # Run tests
-make health-check      # Check system health
-# Data validation
-make validate-ingestion # Validate data ingestion integrity
-
-```
+> **📋 Note**: To view all available commands in the Makefile, simply run `make help` from the root directory of the project.
 
 ### Access Points
 
@@ -509,99 +474,13 @@ The project includes a **Jupyter Notebook** demonstrating real-world API usage w
 
 - **Data Analysis**: Pandas-based data processing and tabular summaries
 
-**🚀 Quick Start**:
-
-```bash
-# Start the API first
-make setup && make run-api-dev
-
-# Open the notebook in VS Code or Jupyter
-code notebooks/notebook_1.ipynb
-
-# Or run Jupyter Lab
-jupyter lab notebooks/notebook_1.ipynb
-```
-
 **📋 Requirements**:
 
+- Jupyter running on `http://localhost:8888`
 - API running on `http://localhost:8000` (or update `BASE_URL` in notebook)
-- Optional: Mapbox token for advanced visualizations (placeholder provided)
+- Optional: Mapbox token for advanced visualizations
 - Python packages: `requests`, `pandas`, `mapboxgl`, `geopandas`, `shapely`
 
-**💡 Use Cases**:
-
-- **Development Testing**: Interactive testing of API endpoints
-- **Data Analysis**: Exploratory analysis of traffic patterns
-- **Client Examples**: Reference implementation for API consumers
-
----
-
-## 🔧 Development & Troubleshooting
-
-### Common Development Tasks
-
-```bash
-# Start development environment
-make start && make run-api-dev
-# Run tests while developing
-make test                    # Quick unit tests
-make test-coverage          # Tests with coverage report
-make test-api               # Test API endpoints
-# Code quality checks
-make format                 # Format code with Black
-make type-check            # Type checking with mypy
-make sort-imports          # Sort imports with isort
-make quality-check         # All quality checks combined
-```
-
-### Troubleshooting Guide
-
-#### ⚙️ Configuration Issues
-
-```bash
-# Check if .env file exists and has correct values
-ls -la .env                # Verify .env file exists
-cat .env                   # Check environment variables
-make health-check          # Verify configuration is loaded correctly
-```
-
-**Common Configuration Problems:**
-- ❌ **Missing `.env` file**: Create `.env` file in project root using the template above
-- ❌ **Wrong database URL**: Ensure `GEOAPI_DATABASE_URL` matches Docker container settings
-- ❌ **Invalid port configuration**: Check `GEOAPI_API_PORT` is set to `8000`
-- ❌ **Missing data source URLs**: Verify both `GEOAPI_LINK_INFO_URL` and `GEOAPI_SPEED_DATA_URL` are set
-
-#### API Not Responding
-
-```bash
-make api-status            # Check status
-make logs                  # View logs
-make restart-api           # Restart API process
-```
-
-#### Container Issues
-
-```bash
-make restart               # Restart all containers
-make logs                  # Check container logs
-make shell                 # Debug inside container
-```
-
-#### Database Issues
-
-```bash
-make db-shell              # Open PostgreSQL shell
-make health-check          # Check database connectivity
-make clean-db              # Clean database (careful!)
-```
-
-#### Development Issues
-
-```bash
-make clean-empty-files     # Remove VS Code empty files
-make clean-pycache         # Clean Python cache
-make format                # Fix code formatting
-```
 
 ---
 
@@ -1015,5 +894,75 @@ These challenges demonstrated:
 - ✅ **Statistical Analysis**: Applied data science techniques to validate business logic
 
 - ✅ **Problem-Solving Methodology**: Structured approach to identifying root causes
+
+---
+
+## 🔧 Development & Troubleshooting
+
+### Common Development Tasks
+
+```bash
+# Start development environment
+make start && make run-api-dev
+# Run tests while developing
+make test                    # Quick unit tests
+make test-coverage          # Tests with coverage report
+make test-api               # Test API endpoints
+# Code quality checks
+make format                 # Format code with Black
+make type-check            # Type checking with mypy
+make sort-imports          # Sort imports with isort
+make quality-check         # All quality checks combined
+```
+
+### Troubleshooting Guide
+
+#### ⚙️ Configuration Issues
+
+```bash
+# Check if .env file exists and has correct values
+ls -la .env                # Verify .env file exists
+cat .env                   # Check environment variables
+make check-api             # Check API
+```
+
+**Common Configuration Problems:**
+- ❌ **Missing `.env` file**: Create `.env` file in project root using the template above
+- ❌ **Wrong database URL**: Ensure `GEOAPI_DATABASE_URL` matches Docker container settings
+- ❌ **Invalid port configuration**: Check `GEOAPI_API_PORT` is set to `8000`
+- ❌ **Missing data source URLs**: Verify both `GEOAPI_LINK_INFO_URL` and `GEOAPI_SPEED_DATA_URL` are set
+
+#### API Not Responding
+
+```bash
+make check-api            # Check status
+make logs                  # View logs
+make restart-api           # Restart API process
+```
+
+#### Container Issues
+
+```bash
+make restart               # Restart all containers
+make logs                  # Check container logs
+make shell                 # Debug inside container
+```
+
+#### Database Issues
+
+```bash
+make check-db             # Check database state
+make check-postgis        # Verify PostGIS spatial data
+make clean-db              # Clean database (careful!)
+make db-shell              # Open PostgreSQL shell
+```
+
+#### Development Issues
+
+```bash
+make clean-empty-files     # Remove VS Code empty files
+make clean-pycache         # Clean Python cache
+make format                # Fix code formatting
+```
 
 ---

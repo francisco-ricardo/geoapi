@@ -2,7 +2,6 @@
 """
 Verify the current state of the database after ingestion.
 """
-
 import sys
 
 sys.path.insert(0, "/workspace")
@@ -13,6 +12,21 @@ from sqlalchemy import func, text
 from app.core.database import get_session_factory
 from app.models.link import Link
 from app.models.speed_record import SpeedRecord
+
+
+def main():
+    """Main verification function."""
+    try:
+        check_database_state()
+        print("\n" + "=" * 80)
+        print(" VERIFICATION COMPLETED")
+        print("=" * 80)
+
+    except Exception as e:
+        print(f"Error during verification: {e}")
+        import traceback
+
+        traceback.print_exc()
 
 
 def check_database_state():
@@ -119,21 +133,6 @@ def check_database_state():
 
         except Exception as e:
             print(f"  Error in geospatial test: {e}")
-
-
-def main():
-    """Main verification function."""
-    try:
-        check_database_state()
-        print("\n" + "=" * 80)
-        print(" VERIFICATION COMPLETED")
-        print("=" * 80)
-
-    except Exception as e:
-        print(f"Error during verification: {e}")
-        import traceback
-
-        traceback.print_exc()
 
 
 if __name__ == "__main__":

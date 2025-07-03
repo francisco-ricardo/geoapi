@@ -17,6 +17,27 @@ from sqlalchemy import text
 from app.core.database import get_session_factory
 
 
+def main():
+    """Main verification function."""
+    try:
+        verify_postgis_geometries()
+
+        print_section("VERIFICATION COMPLETED")
+        print("\nTo connect to PostgreSQL directly with psql:")
+        print("1. From inside the container:")
+        print("   psql -h postgres_db -U geoapi -d geoapi_db")
+        print(
+            "2. Then run the queries from /workspace/scripts/database/postgis_queries.sql"
+        )
+        print("\nPassword: geoapi_password")
+
+    except Exception as e:
+        print(f"Error during verification: {e}")
+        import traceback
+
+        traceback.print_exc()
+
+
 def print_section(title):
     """Print a formatted section header."""
     print("\n" + "=" * 80)
@@ -216,27 +237,6 @@ def verify_postgis_geometries():
         """,
             "9. Links with Speed Data (Top 5 by Average Speed)",
         )
-
-
-def main():
-    """Main verification function."""
-    try:
-        verify_postgis_geometries()
-
-        print_section("VERIFICATION COMPLETED")
-        print("\nTo connect to PostgreSQL directly with psql:")
-        print("1. From inside the container:")
-        print("   psql -h postgres_db -U geoapi -d geoapi_db")
-        print(
-            "2. Then run the queries from /workspace/scripts/database/postgis_queries.sql"
-        )
-        print("\nPassword: geoapi_password")
-
-    except Exception as e:
-        print(f"Error during verification: {e}")
-        import traceback
-
-        traceback.print_exc()
 
 
 if __name__ == "__main__":
