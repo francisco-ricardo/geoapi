@@ -634,7 +634,6 @@ During development, I encountered and resolved three critical technical challeng
 ### 🚀 Performance Optimization: Big Data Ingestion
 
 [![Optimization](https://img.shields.io/badge/Optimization-Memory%20%26%20Speed-success.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-results)
-[![API Development](https://img.shields.io/badge/API%20Development-Production%20Ready-blue.svg?style=flat-square&logo=fastapi&logoColor=white)](#speed-aggregation-analysis)
 
 #### **Problem**
 
