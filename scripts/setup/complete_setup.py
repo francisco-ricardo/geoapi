@@ -9,7 +9,6 @@ This script handles the complete setup process:
 4. API testing
 5. Sample data validation
 
-Designed to make it easy for interviewers to test the API after cloning the repo.
 """
 
 import json

@@ -67,3 +67,5 @@ scripts/data/verify_ingestion.py
 
 # Ignore backup files
 backups/
+
+map.html
