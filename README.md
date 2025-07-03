@@ -575,17 +575,15 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 - **Response Caching**: Redis-based intelligent caching with geospatial awareness
 - **API Versioning**: Semantic versioning strategy with backward compatibility
 - **Architectural Consistency**: Refactor `/links/` endpoint to follow service layer pattern like `/aggregates/`, moving database queries from controller to service layer with proper exception handling.
+- **Async Processing**: Non-blocking I/O with FastAPI async capabilities
+- **Background Tasks**: Celery-based distributed task processing
+- **Memory Management**: Advanced garbage collection and memory profiling
+- **Code Optimization**: Performance profiling and algorithmic improvements
 
 ### 📊 **Database Optimization**
 - **Query Optimization**: Advanced query planning and execution optimization
 - **Partitioning**: Time-based and geographic data partitioning
 - **Materialized Views**: Pre-computed aggregations for complex analytics
-
-#### 🔧 **Application Performance**
-- **Async Processing**: Non-blocking I/O with FastAPI async capabilities
-- **Background Tasks**: Celery-based distributed task processing
-- **Memory Management**: Advanced garbage collection and memory profiling
-- **Code Optimization**: Performance profiling and algorithmic improvements
 
 ### 🏗️ **DevOps**
 - **Microservices Architecture**: Domain-driven service decomposition
@@ -610,7 +608,7 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
   - **CORS Configuration**: Strict cross-origin resource sharing policies
   - **Security Headers**: Implementation of security headers (HSTS, CSP, etc.)
 
-### ⚡ **Performance & Scalability**
+### ⚡ **Horizontal Scaling Architecture**
 
 - **Database Tier**:
   - PostgreSQL cluster with read replicas
