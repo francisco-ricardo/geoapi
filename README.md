@@ -719,7 +719,6 @@ The optimization approach allowed to successfully process over **1.3 million rec
 ### MapboxGL ChoroplethViz Compatibility**
 
 [![MapboxGL](https://img.shields.io/badge/MapboxGL-Integration-orange.svg?style=flat-square&logo=mapbox&logoColor=white)](#mapboxgl-compatibility)
-[![Problem Solving](https://img.shields.io/badge/Problem%20Solving-Advanced-red.svg?style=flat-square&logo=stack-overflow&logoColor=white)](#technical-analysis)
 
 **Problem**: The `legend_title` parameter in `ChoroplethViz` constructor, caused runtime errors.
 
@@ -740,6 +739,8 @@ The optimization approach allowed to successfully process over **1.3 million rec
 **Technical Impact**: Ensured 100% compatibility with current MapboxGL library versions.
 
 ### Data Visualization Coverage Analysis**
+
+[![Problem Solving](https://img.shields.io/badge/Problem%20Solving-Advanced-red.svg?style=flat-square&logo=stack-overflow&logoColor=white)](#technical-analysis)
 
 **Problem**: Initial visualization showed incomplete street coverage, suggesting potential data integrity issues.
 
