@@ -629,24 +629,23 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 
 ## 🔥 Technical Challenges & Solutions
 
-During development, I encountered and resolved three critical technical challenges that demonstrate advanced data engineering and API development expertise,
+During development, I encountered and resolved three critical technical challenges.
 
 ### 🚀 Performance Optimization: Big Data Ingestion
 
 [![Optimization](https://img.shields.io/badge/Optimization-Memory%20%26%20Speed-success.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-results)
 [![API Development](https://img.shields.io/badge/API%20Development-Production%20Ready-blue.svg?style=flat-square&logo=fastapi&logoColor=white)](#speed-aggregation-analysis)
 
-During development, I implemented optimization techniques to handle large-scale data ingestion:
-
-#### **Initial Challenge**
+#### **Problem**
 
 - Processing **1.2M+ speed records** and **100K+ road links** with complex geometries
 - Memory consumption reaching 90%+ with naive approach
 - Slow sequential processing causing timeouts
 
-#### **Three-Tier Optimization Strategy**
+#### **Solution: Three-Tier Optimization Strategy**
 
 ##### 1. 🧩 **Chunk Processing**
+
 ```python
 # Memory-optimized chunk processing
 def process_speed_records_chunked(session, existing_link_ids):
@@ -703,6 +702,8 @@ def _bulk_insert_speed_records(session, speed_objects):
 | Reliability | Frequent OOM errors | Zero failures | 100% reliable |
 | Records/second | ~800 | ~3,000 | 3.75x throughput |
 
+The optimization approach allowed to successfully process over **1.3 million records** with complex spatial data while maintaining excellent performance.
+
 #### **Key Insights**
 
 - ✅ **Optimal Chunk Size**: 5K records provides the best balance between memory usage and performance.
@@ -714,37 +715,6 @@ def _bulk_insert_speed_records(session, speed_objects):
 - ✅ **Progress Monitoring**: Real-time tracking improves user experience during long-running processes.
 
 - ✅ **Error Recovery**: Chunked approach allows for granular error handling and retries.
-
-#### **Code Implementation**
-
-```python
-# Configuration constants based on optimization testing
-LINK_CHUNK_SIZE = 5000
-SPEED_RECORD_CHUNK_SIZE = 5000
-LINK_BATCH_SIZE = 1000
-SPEED_BATCH_SIZE = 2000
-
-# Main processing function follows SOLID principles
-def process_speed_records_chunked(session, existing_link_ids):
-    """Process 1.2M+ records efficiently with minimal memory footprint"""
-    print(f"Processing speed records in chunks of {SPEED_RECORD_CHUNK_SIZE:,} records...")
-
-    for start_idx in range(0, total_records, SPEED_RECORD_CHUNK_SIZE):
-        # Process one chunk at a time
-        chunk_df = speed_df.iloc[start_idx:start_idx + SPEED_RECORD_CHUNK_SIZE]
-
-        # Transform data (separated responsibility)
-        speed_objects, chunk_skipped = _transform_speed_chunk(chunk_df, existing_link_ids)
-
-        # Bulk insert with optimized batch size (separated responsibility)
-        chunk_inserted = _bulk_insert_speed_records(session, speed_objects)
-
-        # Memory cleanup - critical for processing large datasets
-        del speed_objects, chunk_df
-        gc.collect()
-```
-
-This optimization approach allowed to successfully process over **1.3 million records** with complex spatial data while maintaining excellent performance.
 
 ### MapboxGL ChoroplethViz Compatibility**
 
@@ -837,14 +807,6 @@ This optimization approach allowed to successfully process over **1.3 million re
 
 - Validated API integrity with proper varied speed data
 
-#### **Key Technical Insights**
-
-| Challenge Area | Investigation Depth | Solution Complexity | Business Impact |
-|----------------|-------------------|-------------------|-----------------|
-| **Library Compatibility** | Documentation deep-dive | Parameter removal | High - Client delivery |
-| **Data Integrity** | Statistical validation | Visualization optimization | Critical - Data accuracy |
-| **API Functionality** | End-to-end pipeline analysis | Data re-ingestion | High - Core functionality |
-
 ---
 
 ## 🔧 Development & Troubleshooting
@@ -880,14 +842,14 @@ make check-api             # Check API
 - ❌ **Missing `.env` file**: Create `.env` file in project root using the template above
 - ❌ **Wrong database URL**: Ensure `GEOAPI_DATABASE_URL` matches Docker container settings
 - ❌ **Invalid port configuration**: Check `GEOAPI_API_PORT` is set to `8000`
-- ❌ **Missing data source URLs**: Verify both `GEOAPI_LINK_INFO_URL` and `GEOAPI_SPEED_DATA_URL` are set
 
 #### API Not Responding
 
 ```bash
 make check-api            # Check status
-make logs                  # View logs
-make restart-api           # Restart API process
+make test                 # Run unit tests
+make logs                 # View logs
+make restart-api          # Restart API process
 ```
 
 #### Container Issues
@@ -903,8 +865,8 @@ make shell                 # Debug inside container
 ```bash
 make check-db             # Check database state
 make check-postgis        # Verify PostGIS spatial data
-make clean-db              # Clean database (careful!)
-make db-shell              # Open PostgreSQL shell
+make clean-db             # Clean database (careful!)
+make db-shell             # Open PostgreSQL shell
 ```
 
 #### Development Issues
