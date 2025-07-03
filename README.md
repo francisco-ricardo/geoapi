@@ -117,28 +117,16 @@ The following diagram shows the complete system architecture, including data sou
 ## 📊 Code Quality
 
 ### Quality Metrics & Standards
+
 - ✅ **Type Safety**: 100% mypy type checking coverage
+
 - ✅ **Code Style**: Black formatting with consistent style
+
 - ✅ **Import Sorting**: isort for clean import organization
-- ✅ **Test Coverage**: 66% overall coverage with domain-specific targets
+
 - ✅ **Architecture**: Clean architecture with domain separation
+
 - ✅ **Documentation**: Comprehensive docstrings and API documentation
-
-### Quality Commands
-
-```bash
-# Code formatting
-make format              # Format code with Black
-make format-check        # Check formatting without changes
-# Type checking
-make type-check          # Run mypy type checking
-make type-check-strict   # Strict type checking
-# Import sorting
-make sort-imports        # Sort imports with isort
-make sort-imports-check  # Check import sorting
-# Combined quality check
-make quality-check       # Run all quality checks
-```
 
 ### Code Quality Tools
 
@@ -150,10 +138,15 @@ make quality-check       # Run all quality checks
 | **pytest** | Testing framework | Coverage enabled | ✅ 109 tests |
 
 ### Quality Gates
+
 - All code must pass Black formatting
+
 - All code must pass mypy type checking
+
 - All tests must pass (100% success rate)
+
 - New code should maintain or improve coverage
+
 - All commits should follow conventional commit format
 
 ---
@@ -292,8 +285,11 @@ make validate-ingestion # Validate data ingestion integrity
 ```
 
 ### Access Points
+
 - **API Server**: http://localhost:8000
+
 - **API Documentation**: http://localhost:8000/docs  
+
 - **Health Check**: http://localhost:8000/health
 
 ---

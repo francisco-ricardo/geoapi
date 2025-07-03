@@ -65,8 +65,5 @@ coverage.xml
 mapbox_patch.py
 scripts/data/verify_ingestion.py
 
-# Ignore all notebooks in notebooks folder (will be recreated by user)
-notebooks/*.ipynb
-
 # Ignore backup files
 backups/
