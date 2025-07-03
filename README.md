@@ -22,25 +22,52 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 ## 🏆 Project Highlights
 
 ### ✨ **Quality Achievements**
+
 - **109 Tests**: Comprehensive test suite with 100% pass rate
+
 - **Clean Code**: Clean, well-organized codebase following SOLID principles
+
 - **Performance Optimized**: Handles 1.3M+ records efficiently with chunked processing
+
 - **Code Style**: Black formatting with consistent style
+
 - **Documentation**: Comprehensive docstrings and API documentation
 
 ### 🚀 **Technical Excellence**
+
 - **Clean Architecture**: Domain-driven design with clear separation of concerns
+
 - **Type Safety**: Full typing support with mypy validation
+
 - **Observability**: Structured logging with correlation IDs and request tracing
+
 - **Geospatial Ready**: PostGIS integration with GeoJSON support
+
 - **DevOps Ready**: Complete Docker setup with development containers
 
 ### 📊 **Data Processing Capabilities**
+
 - **Big Data Handling**: Optimized for processing millions of records
+
 - **Memory Efficient**: Chunked processing with automatic garbage collection
+
 - **Integrity Validation**: Comprehensive data validation and consistency checks
+
 - **Multiple Formats**: Support for Parquet, GeoJSON, and standard database formats
+
 - **Interactive Visualization**: Jupyter notebook with MapboxGL integration for data exploration
+
+### 🔧 **Design Patterns**
+
+- **Factory Pattern**: Database engine and session creation (`get_engine()`, `get_session_factory()`)
+
+- **Dependency Injection**: FastAPI DI system for configuration and database dependencies
+
+- **Middleware Pattern**: Request logging and correlation IDs (`LoggingMiddleware`)
+
+- **Strategy Pattern**: Environment-specific configurations and database adapters
+
+- **Singleton Pattern**: Cached database engine and logger instances
 
 ---
 
@@ -100,19 +127,7 @@ The project follows **Clean Architecture**, **SOLID**, and **KISS** principles w
 └─────────────────────────────────────────┘
 ```
 
-### 🔧 **Design Patterns Implemented**
-
-- **Factory Pattern**: Database engine and session creation (`get_engine()`, `get_session_factory()`)
-
-- **Dependency Injection**: FastAPI DI system for configuration and database dependencies
-
-- **Middleware Pattern**: Request logging and correlation IDs (`LoggingMiddleware`)
-
-- **Strategy Pattern**: Environment-specific configurations and database adapters
-
-- **Singleton Pattern**: Cached database engine and logger instances
-
-### 🏗️ **System Architecture & Data Flow**
+### 🏗️ **Data Flow**
 
 The following diagram shows the complete system architecture, including data sources, ingestion pipeline, database integration, API services, and visualization components:
 
