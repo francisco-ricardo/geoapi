@@ -562,8 +562,11 @@ The project includes a **Jupyter Notebook** demonstrating real-world API usage w
 
 ## 🚧 Future Work
 
-[![Production Ready](https://img.shields.io/badge/Status-MVP%20Complete-success.svg?style=flat-square&logo=checkmarx&logoColor=white)](#future-work)
+[![Security](https://img.shields.io/badge/Security-Enterprise%20Grade-red.svg?style=flat-square&logo=security&logoColor=white)](#security-implementation)
+[![Performance](https://img.shields.io/badge/Performance-Enterprise%20Scale-green.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-optimization)
+[![Scalability](https://img.shields.io/badge/Scalability-Cloud%20Native-blue.svg?style=flat-square&logo=kubernetes&logoColor=white)](#horizontal-scaling)
 [![Roadmap](https://img.shields.io/badge/Roadmap-Production%20Features-blue.svg?style=flat-square&logo=roadmap&logoColor=white)](#production-roadmap)
+[![Production Ready](https://img.shields.io/badge/Status-MVP%20Complete-success.svg?style=flat-square&logo=checkmarx&logoColor=white)](#future-work)
 
 This project represents a **comprehensive MVP** demonstrating advanced data engineering and API development capabilities. The following enhancements would be prioritized for production deployment:
 
@@ -591,10 +594,6 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 
 ### 🔐 **Security Considerations**
 
-[![Security](https://img.shields.io/badge/Security-Enterprise%20Grade-red.svg?style=flat-square&logo=security&logoColor=white)](#security-implementation)
-
-#### 🛡️ **Authentication & Authorization**
-
 - **Authentication**:
   - JWT/OAuth 2.0 with refresh tokens
   - Role-based access control (RBAC)
@@ -604,19 +603,15 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
   - Fine-grained permissions (read/write/admin)
   - Resource-level access control
 
-#### 🚨 **API Security**
-- **Input Validation**: Comprehensive sanitization and validation
-- **SQL Injection Prevention**: Parameterized queries and ORM protection
-- **Rate Limiting**: Adaptive rate limiting with DDoS protection
-- **CORS Configuration**: Strict cross-origin resource sharing policies
-- **Security Headers**: Implementation of security headers (HSTS, CSP, etc.)
+- 🚨 **API Security**
+  - **Input Validation**: Comprehensive sanitization and validation
+  - **SQL Injection Prevention**: Parameterized queries and ORM protection
+  - **Rate Limiting**: Adaptive rate limiting with DDoS protection
+  - **CORS Configuration**: Strict cross-origin resource sharing policies
+  - **Security Headers**: Implementation of security headers (HSTS, CSP, etc.)
 
 ### ⚡ **Performance & Scalability**
 
-[![Performance](https://img.shields.io/badge/Performance-Enterprise%20Scale-green.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-optimization)
-[![Scalability](https://img.shields.io/badge/Scalability-Cloud%20Native-blue.svg?style=flat-square&logo=kubernetes&logoColor=white)](#horizontal-scaling)
-
-#### 🏗️ **Horizontal Scaling Architecture**
 - **Database Tier**:
   - PostgreSQL cluster with read replicas
   - Horizontal partitioning by geographic regions
