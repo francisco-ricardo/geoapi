@@ -660,11 +660,14 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 
 ## 🔥 Technical Challenges & Solutions
 
+During development, I encountered and resolved three critical technical challenges that demonstrate advanced data engineering and API development expertise,
+
 ### 🚀 Performance Optimization: Big Data Ingestion
 
 [![Optimization](https://img.shields.io/badge/Optimization-Memory%20%26%20Speed-success.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-results)
+[![API Development](https://img.shields.io/badge/API%20Development-Production%20Ready-blue.svg?style=flat-square&logo=fastapi&logoColor=white)](#speed-aggregation-analysis)
 
-During development, I implemented several optimization techniques to handle large-scale data ingestion:
+During development, I implemented optimization techniques to handle large-scale data ingestion:
 
 #### **Initial Challenge**
 
@@ -774,18 +777,10 @@ def process_speed_records_chunked(session, existing_link_ids):
 
 This optimization approach allowed to successfully process over **1.3 million records** with complex spatial data while maintaining excellent performance.
 
----
+### MapboxGL ChoroplethViz Compatibility**
 
-### 🔍 Critical Technical Challenges & Solutions
-
-[![Data Engineering](https://img.shields.io/badge/Data%20Engineering-Expert%20Level-success.svg?style=flat-square&logo=databricks&logoColor=white)](#data-integrity-validation)
-[![API Development](https://img.shields.io/badge/API%20Development-Production%20Ready-blue.svg?style=flat-square&logo=fastapi&logoColor=white)](#speed-aggregation-analysis)
 [![MapboxGL](https://img.shields.io/badge/MapboxGL-Integration-orange.svg?style=flat-square&logo=mapbox&logoColor=white)](#mapboxgl-compatibility)
 [![Problem Solving](https://img.shields.io/badge/Problem%20Solving-Advanced-red.svg?style=flat-square&logo=stack-overflow&logoColor=white)](#technical-analysis)
-
-During development, I encountered and resolved three critical technical challenges that demonstrate advanced data engineering and API development expertise:
-
-#### **Challenge 1: MapboxGL ChoroplethViz Compatibility**
 
 **Problem**: The `legend_title` parameter in `ChoroplethViz` constructor, caused runtime errors.
 
@@ -805,7 +800,7 @@ During development, I encountered and resolved three critical technical challeng
 
 **Technical Impact**: Ensured 100% compatibility with current MapboxGL library versions.
 
-#### **Challenge 2: Data Visualization Coverage Analysis**
+### Data Visualization Coverage Analysis**
 
 **Problem**: Initial visualization showed incomplete street coverage, suggesting potential data integrity issues.
 
@@ -833,7 +828,9 @@ During development, I encountered and resolved three critical technical challeng
 
 **Technical Impact**: Verified that the API correctly represents real-world traffic measurement patterns, not data corruption.
 
-#### **Challenge 3: Speed Aggregation Deep Dive**
+### Speed Aggregation Deep Dive**
+
+[![Data Engineering](https://img.shields.io/badge/Data%20Engineering-Expert%20Level-success.svg?style=flat-square&logo=databricks&logoColor=white)](#data-integrity-validation)
 
 **Problem**: Initial concern that API was returning constant speed values (0.62 mph) in sorted results.
 
@@ -878,22 +875,6 @@ During development, I encountered and resolved three critical technical challeng
 | **Library Compatibility** | Documentation deep-dive | Parameter removal | High - Client delivery |
 | **Data Integrity** | Statistical validation | Visualization optimization | Critical - Data accuracy |
 | **API Functionality** | End-to-end pipeline analysis | Data re-ingestion | High - Core functionality |
-
-#### **Professional Development Impact**
-
-These challenges demonstrated:
-
-- ✅ **Advanced Debugging**: Systematic approach to complex technical issues
-
-- ✅ **Data Engineering Expertise**: Comprehensive data validation and integrity checking
-
-- ✅ **API Development Proficiency**: End-to-end troubleshooting of RESTful services
-
-- ✅ **Documentation Research**: Thorough investigation of third-party library limitations
-
-- ✅ **Statistical Analysis**: Applied data science techniques to validate business logic
-
-- ✅ **Problem-Solving Methodology**: Structured approach to identifying root causes
 
 ---
 
