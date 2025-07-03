@@ -22,9 +22,8 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 
 ### ✨ **Quality Achievements**
 - **109 Tests**: Comprehensive test suite with 100% pass rate
-- **Zero Technical Debt**: Clean, well-organized codebase following SOLID principles
+- **Clean Code**: Clean, well-organized codebase following SOLID principles
 - **Performance Optimized**: Handles 1.3M+ records efficiently with chunked processing
-- **Production Ready**: Docker containerized with health checks and monitoring
 - **Code Style**: Black formatting with consistent style
 - **Documentation**: Comprehensive docstrings and API documentation
 
@@ -47,22 +46,33 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 ## 🔌 Technologies
 
 ### Core Stack
+
 - **Backend**: FastAPI, SQLAlchemy 2.0, Pydantic v2
+
 - **Database**: PostgreSQL + PostGIS (with automatic table creation)
+
 - **Geospatial**: GeoAlchemy2, PostGIS, GeoJSON
+
 - **Testing**: pytest, TDD approach with 109 tests
+
 - **DevOps**: Docker, DevContainer, automated setup
 
 ### Development Tools
+
 - **Code Quality**: Black (formatting), mypy (type checking)
+
 - **Testing**: pytest with fixtures, parametrized tests, coverage reports
+
 - **Documentation**: FastAPI auto-docs, Swagger UI, comprehensive docstrings
+
 - **Performance**: SQLAlchemy bulk operations, memory-optimized data processing
+
 - **Observability**: Structured logging, correlation IDs, request tracing
 
 ---
 
 ## 🏗️ Architecture
+
 The project follows **Clean Architecture**, **SOLID**, and **KISS** principles with a layered approach:
 
 ### 📊 **Application Layers**
@@ -90,10 +100,15 @@ The project follows **Clean Architecture**, **SOLID**, and **KISS** principles w
 ```
 
 ### 🔧 **Design Patterns Implemented**
+
 - **Factory Pattern**: Database engine and session creation (`get_engine()`, `get_session_factory()`)
+
 - **Dependency Injection**: FastAPI DI system for configuration and database dependencies
+
 - **Middleware Pattern**: Request logging and correlation IDs (`LoggingMiddleware`)
+
 - **Strategy Pattern**: Environment-specific configurations and database adapters
+
 - **Singleton Pattern**: Cached database engine and logger instances
 
 ### 🏗️ **System Architecture & Data Flow**
@@ -103,13 +118,21 @@ The following diagram shows the complete system architecture, including data sou
 ![Architecture Diagram](docs/geoapi_architecture.drawio.png)
 
 **📋 Architecture Highlights:**
+
 - **🔄 Data Pipeline**: Complete ETL process from external Parquet files to PostGIS database
+
 - **🏗️ Clean Architecture**: Layered FastAPI application following SOLID principles  
+
 - **🗄️ Spatial Database**: PostgreSQL + PostGIS with optimized indexes for geospatial queries
+
 - **📊 Big Data Processing**: Handles 1.3M+ records with chunked processing and memory optimization
+
 - **🌐 RESTful API**: FastAPI with automatic OpenAPI documentation and validation
+
 - **📈 Data Visualization**: Jupyter notebook with MapboxGL for interactive geospatial analysis
+
 - **🔍 Observability**: Comprehensive logging, correlation IDs, and request tracing
+
 - **🐳 Containerized**: Full Docker setup with PostgreSQL and FastAPI services
 
 ---
@@ -157,6 +180,95 @@ The GeoAPI uses a well-designed relational schema optimized for geospatial traff
 - **SQLAlchemy 2.0**: ORM with modern async support
 
 - **GeoAlchemy2**: Spatial extension for SQLAlchemy with PostGIS integration
+
+---
+
+## 📋 Logging and Observability
+
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Ready-4287f5.svg?style=flat-square&logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
+[![Correlation IDs](https://img.shields.io/badge/Correlation%20IDs-Enabled-green.svg?style=flat-square)](https://microservices.io/patterns/observability/distributed-tracing.html)
+[![Structured Logging](https://img.shields.io/badge/Structured%20Logging-JSON%20%26%20Console-blue.svg?style=flat-square)](https://12factor.net/logs)
+[![Cloud Ready](https://img.shields.io/badge/Cloud%20Ready-Observability-purple.svg?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/logging)
+
+The API includes a comprehensive logging and observability system:
+
+### Key Features
+
+- **Structured Logging**: Supports both human-readable console logs and machine-parseable JSON format
+- **Correlation IDs**: Every request gets a unique ID that is propagated through all logs
+- **Request/Response Logging**: Automatic logging of all HTTP requests with timing and performance metrics
+- **Cloud-Ready**: Designed for integration with cloud observability platforms
+- **Contextual Logging**: Endpoint handlers can access request-scoped loggers with correlation IDs
+
+### Configuration
+
+Logging can be configured via environment variables:
+
+```bash
+# Logging configuration
+GEOAPI_LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+GEOAPI_LOG_FORMAT=console  # console or json
+GEOAPI_LOG_TO_FILE=false  # true or false
+GEOAPI_LOG_FILE_PATH=/var/log/geoapi/app.log  # Path for file logging
+
+# Observability settings
+GEOAPI_ENABLE_TRACING=false  # Enable distributed tracing
+GEOAPI_TRACING_PROVIDER=otlp  # otlp, jaeger, honeycomb
+GEOAPI_TRACING_ENDPOINT=http://localhost:4317  # Endpoint for tracing exporter
+```
+
+### Log Formats
+
+#### Development Mode (Console)
+```
+2025-06-29 10:15:23,456 [INFO] geoapi.request:42 - Request started: GET /api/v1/links
+2025-06-29 10:15:23,512 [INFO] geoapi.request:98 - Request completed: GET /api/v1/links - 200
+```
+
+#### Production Mode (JSON)
+```json
+{
+  "timestamp": "2025-06-29T10:15:23.456Z",
+  "level": "INFO",
+  "message": "Request completed: GET /api/v1/links - 200",
+  "logger": "geoapi.request",
+  "location": {
+    "module": "logging_middleware",
+    "function": "dispatch",
+    "line": 98
+  },
+  "correlation_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+  "http": {
+    "method": "GET",
+    "url": "http://localhost:8000/api/v1/links",
+    "status_code": 200,
+    "response_time": 0.056,
+    "request_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+  },
+  "event": "request_completed",
+  "performance": {
+    "response_time": 0.056
+  }
+}
+```
+
+### Usage in Code
+
+```python
+# In FastAPI endpoints
+@app.get("/items/{item_id}")
+async def get_item(
+    item_id: int,
+    logger: ContextLogger = Depends(get_request_logger)
+):
+    logger.info(f"Processing item {item_id}")
+
+    # Add context for this specific operation
+    operation_logger = logger.with_context({"operation": "get_item"})
+    operation_logger.debug("Detailed operation info", extra={"item_id": item_id})
+
+    return {"item_id": item_id}
+```
 
 ---
 
@@ -446,96 +558,6 @@ The project includes a **Jupyter Notebook** demonstrating real-world API usage w
 - Optional: Mapbox token for advanced visualizations
 - Python packages: `requests`, `pandas`, `mapboxgl`, `geopandas`, `shapely`
 
-
----
-
-## 📋 Logging and Observability
-
-[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Ready-4287f5.svg?style=flat-square&logo=opentelemetry&logoColor=white)](https://opentelemetry.io/)
-[![Correlation IDs](https://img.shields.io/badge/Correlation%20IDs-Enabled-green.svg?style=flat-square)](https://microservices.io/patterns/observability/distributed-tracing.html)
-[![Structured Logging](https://img.shields.io/badge/Structured%20Logging-JSON%20%26%20Console-blue.svg?style=flat-square)](https://12factor.net/logs)
-[![Cloud Ready](https://img.shields.io/badge/Cloud%20Ready-Observability-purple.svg?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/logging)
-
-The API includes a comprehensive logging and observability system:
-
-### Key Features
-
-- **Structured Logging**: Supports both human-readable console logs and machine-parseable JSON format
-- **Correlation IDs**: Every request gets a unique ID that is propagated through all logs
-- **Request/Response Logging**: Automatic logging of all HTTP requests with timing and performance metrics
-- **Cloud-Ready**: Designed for integration with cloud observability platforms
-- **Contextual Logging**: Endpoint handlers can access request-scoped loggers with correlation IDs
-
-### Configuration
-
-Logging can be configured via environment variables:
-
-```bash
-# Logging configuration
-GEOAPI_LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-GEOAPI_LOG_FORMAT=console  # console or json
-GEOAPI_LOG_TO_FILE=false  # true or false
-GEOAPI_LOG_FILE_PATH=/var/log/geoapi/app.log  # Path for file logging
-
-# Observability settings
-GEOAPI_ENABLE_TRACING=false  # Enable distributed tracing
-GEOAPI_TRACING_PROVIDER=otlp  # otlp, jaeger, honeycomb
-GEOAPI_TRACING_ENDPOINT=http://localhost:4317  # Endpoint for tracing exporter
-```
-
-### Log Formats
-
-#### Development Mode (Console)
-```
-2025-06-29 10:15:23,456 [INFO] geoapi.request:42 - Request started: GET /api/v1/links
-2025-06-29 10:15:23,512 [INFO] geoapi.request:98 - Request completed: GET /api/v1/links - 200
-```
-
-#### Production Mode (JSON)
-```json
-{
-  "timestamp": "2025-06-29T10:15:23.456Z",
-  "level": "INFO",
-  "message": "Request completed: GET /api/v1/links - 200",
-  "logger": "geoapi.request",
-  "location": {
-    "module": "logging_middleware",
-    "function": "dispatch",
-    "line": 98
-  },
-  "correlation_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
-  "http": {
-    "method": "GET",
-    "url": "http://localhost:8000/api/v1/links",
-    "status_code": 200,
-    "response_time": 0.056,
-    "request_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
-  },
-  "event": "request_completed",
-  "performance": {
-    "response_time": 0.056
-  }
-}
-```
-
-### Usage in Code
-
-```python
-# In FastAPI endpoints
-@app.get("/items/{item_id}")
-async def get_item(
-    item_id: int,
-    logger: ContextLogger = Depends(get_request_logger)
-):
-    logger.info(f"Processing item {item_id}")
-
-    # Add context for this specific operation
-    operation_logger = logger.with_context({"operation": "get_item"})
-    operation_logger.debug("Detailed operation info", extra={"item_id": item_id})
-
-    return {"item_id": item_id}
-```
-
 ---
 
 ## 🚧 Future Work
@@ -551,20 +573,27 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 - **API Versioning**: Semantic versioning strategy with backward compatibility
 - **Architectural Consistency**: Refactor `/links/` endpoint to follow service layer pattern like `/aggregates/`, moving database queries from controller to service layer with proper exception handling.
 
-### 🏗️ **Infrastructure & DevOps**
+### 📊 **Database Optimization**
+- **Query Optimization**: Advanced query planning and execution optimization
+- **Partitioning**: Time-based and geographic data partitioning
+- **Materialized Views**: Pre-computed aggregations for complex analytics
+
+#### 🔧 **Application Performance**
+- **Async Processing**: Non-blocking I/O with FastAPI async capabilities
+- **Background Tasks**: Celery-based distributed task processing
+- **Memory Management**: Advanced garbage collection and memory profiling
+- **Code Optimization**: Performance profiling and algorithmic improvements
+
+### 🏗️ **DevOps**
 - **Microservices Architecture**: Domain-driven service decomposition
-- **Container Orchestration**: Kubernetes deployment with auto-scaling
 - **CI/CD Pipeline**: Automated testing, security scanning, and deployment
 - **Multi-Environment Setup**: Development, staging, and production environments
----
 
-## 🔐 Security Considerations
+### 🔐 **Security Considerations**
 
 [![Security](https://img.shields.io/badge/Security-Enterprise%20Grade-red.svg?style=flat-square&logo=security&logoColor=white)](#security-implementation)
 
-> **⚠️ Note**: This MVP focuses on technical architecture and data engineering capabilities. Production security implementation would include comprehensive security measures detailed below.
-
-### 🛡️ **Authentication & Authorization**
+#### 🛡️ **Authentication & Authorization**
 
 - **Authentication**:
   - JWT/OAuth 2.0 with refresh tokens
@@ -575,23 +604,19 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
   - Fine-grained permissions (read/write/admin)
   - Resource-level access control
 
-### 🚨 **API Security**
+#### 🚨 **API Security**
 - **Input Validation**: Comprehensive sanitization and validation
 - **SQL Injection Prevention**: Parameterized queries and ORM protection
 - **Rate Limiting**: Adaptive rate limiting with DDoS protection
 - **CORS Configuration**: Strict cross-origin resource sharing policies
 - **Security Headers**: Implementation of security headers (HSTS, CSP, etc.)
 
----
-
-## ⚡ Performance & Scalability
+### ⚡ **Performance & Scalability**
 
 [![Performance](https://img.shields.io/badge/Performance-Enterprise%20Scale-green.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-optimization)
 [![Scalability](https://img.shields.io/badge/Scalability-Cloud%20Native-blue.svg?style=flat-square&logo=kubernetes&logoColor=white)](#horizontal-scaling)
 
-> **📊 Current State**: The MVP efficiently handles 1.3M+ records with optimized chunk processing. Production scaling would implement the enterprise-grade solutions below.
-
-### 🏗️ **Horizontal Scaling Architecture**
+#### 🏗️ **Horizontal Scaling Architecture**
 - **Database Tier**:
   - PostgreSQL cluster with read replicas
   - Horizontal partitioning by geographic regions
@@ -608,18 +633,6 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
   - Geospatial query result caching
   - CDN for static assets and documentation
   - Application-level caching strategies
-
-### 📊 **Database Optimization**
-
-- **Query Optimization**: Advanced query planning and execution optimization
-- **Partitioning**: Time-based and geographic data partitioning
-- **Materialized Views**: Pre-computed aggregations for complex analytics
-
-### 🔧 **Application Performance**
-- **Async Processing**: Non-blocking I/O with FastAPI async capabilities
-- **Background Tasks**: Celery-based distributed task processing
-- **Memory Management**: Advanced garbage collection and memory profiling
-- **Code Optimization**: Performance profiling and algorithmic improvements
 
 ---
 
