@@ -8,10 +8,8 @@
 [![Pydantic](https://img.shields.io/badge/Pydantic-2.11.1-E92063.svg?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/latest/)
 [![pytest](https://img.shields.io/badge/pytest-8.4.1-0A9EDC.svg?style=flat-square&logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Pandas](https://img.shields.io/badge/Pandas-2.3.0-150458.svg?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
-[![Shapely](https://img.shields.io/badge/Shapely-2.1.1-blue.svg?style=flat-square)](https://shapely.readthedocs.io/)
 [![GeoAlchemy2](https://img.shields.io/badge/GeoAlchemy2-0.17.1-green.svg?style=flat-square)](https://geoalchemy-2.readthedocs.io/)
 [![Geospatial](https://img.shields.io/badge/Geospatial-GeoJSON-brightgreen.svg?style=flat-square)](https://geojson.org/)
-[![PyArrow](https://img.shields.io/badge/PyArrow-20.0.0-red.svg?style=flat-square)](https://arrow.apache.org/docs/python/)
 [![API Docs](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D.svg?style=flat-square&logo=swagger&logoColor=white)](http://localhost:8000/docs)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean-blue.svg?style=flat-square)](#project-structure)
 [![Big Data](https://img.shields.io/badge/Big%20Data-1.2M%2B%20Records-red.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
@@ -27,9 +25,7 @@ A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQ
 - **Zero Technical Debt**: Clean, well-organized codebase following SOLID principles
 - **Performance Optimized**: Handles 1.3M+ records efficiently with chunked processing
 - **Production Ready**: Docker containerized with health checks and monitoring
-- **Type Safety**: 100% mypy type checking coverage
 - **Code Style**: Black formatting with consistent style
-- **Architecture**: Clean architecture with domain separation
 - **Documentation**: Comprehensive docstrings and API documentation
 
 ### 🚀 **Technical Excellence**
