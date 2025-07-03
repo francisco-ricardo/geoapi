@@ -783,15 +783,16 @@ This project represents a **comprehensive MVP** demonstrating advanced data engi
 
 ---
 
-## 📚 Lessons Learned
+## 🔥 Technical Challenges & Solutions
 
 ### 🚀 Performance Optimization: Big Data Ingestion
 
 [![Optimization](https://img.shields.io/badge/Optimization-Memory%20%26%20Speed-success.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-results)
 
-During development, we implemented several optimization techniques to handle large-scale data ingestion:
+During development, I implemented several optimization techniques to handle large-scale data ingestion:
 
 #### **Initial Challenge**
+
 - Processing **1.2M+ speed records** and **100K+ road links** with complex geometries
 - Memory consumption reaching 90%+ with naive approach
 - Slow sequential processing causing timeouts
@@ -813,7 +814,9 @@ def process_speed_records_chunked(session, existing_link_ids):
 ```
 
 ##### 2. 🔄 **Streaming Pipeline**
+
 The data flows through a sequential pipeline with defined stages:
+
 1. Load chunk from Parquet dataset
 2. Transform to ORM objects with geometry processing
 3. Bulk insert to database
@@ -833,6 +836,7 @@ def _bulk_insert_links(session, objects):
 ```
 
 ##### 3. ⚡ **Optimized Bulk Operations**
+
 ```python
 # Efficient batch operations
 def _bulk_insert_speed_records(session, speed_objects):
@@ -853,13 +857,19 @@ def _bulk_insert_speed_records(session, speed_objects):
 | Records/second | ~800 | ~3,000 | 3.75x throughput |
 
 #### **Key Insights**
-- ✅ **Optimal Chunk Size**: 5K records provides the best balance between memory usage and performance
-- ✅ **Batch Size Impact**: SQLAlchemy bulk operations with 2K batch size are 10x faster than individual inserts
-- ✅ **Memory Management**: Explicit garbage collection between chunks is critical for large datasets
-- ✅ **Progress Monitoring**: Real-time tracking improves user experience during long-running processes
-- ✅ **Error Recovery**: Chunked approach allows for granular error handling and retries
+
+- ✅ **Optimal Chunk Size**: 5K records provides the best balance between memory usage and performance.
+
+- ✅ **Batch Size Impact**: SQLAlchemy bulk operations with 2K batch size are 10x faster than individual inserts.
+
+- ✅ **Memory Management**: Explicit garbage collection between chunks is critical for large datasets.
+
+- ✅ **Progress Monitoring**: Real-time tracking improves user experience during long-running processes.
+
+- ✅ **Error Recovery**: Chunked approach allows for granular error handling and retries.
 
 #### **Code Implementation**
+
 ```python
 # Configuration constants based on optimization testing
 LINK_CHUNK_SIZE = 5000
@@ -887,7 +897,7 @@ def process_speed_records_chunked(session, existing_link_ids):
         gc.collect()
 ```
 
-This optimization approach allowed us to successfully process over **1.3 million records** with complex spatial data while maintaining excellent performance and reliability.
+This optimization approach allowed to successfully process over **1.3 million records** with complex spatial data while maintaining excellent performance.
 
 ---
 
@@ -902,13 +912,17 @@ During development, I encountered and resolved three critical technical challeng
 
 #### **Challenge 1: MapboxGL ChoroplethViz Compatibility**
 
-**Problem**: Client specification included `legend_title` parameter in `ChoroplethViz` constructor, causing runtime errors.
+**Problem**: The `legend_title` parameter in `ChoroplethViz` constructor, caused runtime errors.
 
 **Investigation Approach**:
-- Consulted official MapboxGL Python documentation
-- Explored alternative implementation approaches (custom wrapper classes)
-- Analyzed library source code and issue trackers
-- Tested various parameter combinations
+
+- Consulted official MapboxGL Python documentation.
+
+- Explored alternative implementation approaches (custom wrapper classes).
+
+- Analyzed library source code and issue trackers.
+
+- Tested various parameter combinations.
 
 **Root Cause**: The `legend_title` parameter was deprecated/undocumented in current MapboxGL Python version, despite appearing in older examples.
 
@@ -921,17 +935,25 @@ During development, I encountered and resolved three critical technical challeng
 **Problem**: Initial visualization showed incomplete street coverage, suggesting potential data integrity issues.
 
 **Investigation Approach**:
+
 - Created comprehensive data diagnostic scripts
+
 - Analyzed geometric validity of 57,130+ road segments
+
 - Validated spatial data consistency across the entire dataset
+
 - Performed statistical analysis of speed distribution patterns
+
 - Cross-referenced with Jacksonville, FL road network topology
 
-**Root Cause**: The "gaps" in visualization accurately reflected the real dataset structure - many minor residential roads have sparse traffic measurement coverage.
+**Root Cause**: The "gaps" in visualization accurately reflected the real dataset structure; many minor residential roads have sparse traffic measurement coverage.
 
 **Solution**:
+
 - Confirmed data integrity through exhaustive validation
+
 - Optimized visualization parameters for better coverage appearance
+
 - Documented the realistic nature of traffic data collection
 
 **Technical Impact**: Verified that the API correctly represents real-world traffic measurement patterns, not data corruption.
@@ -941,24 +963,37 @@ During development, I encountered and resolved three critical technical challeng
 **Problem**: Initial concern that API was returning constant speed values (0.62 mph) in sorted results.
 
 **Investigation Approach**:
+
 - Analyzed complete speed distribution across 57,130 road segments
+
 - Performed statistical analysis of aggregated traffic data
+
 - Investigated data ingestion pipeline for potential bugs
+
 - Examined database field population (`day_of_week` initially empty)
+
 - Conducted API response validation across multiple endpoints
 
 **Root Cause Discovery**:
+
 1. **Data Ingestion Bug**: `day_of_week` field was not being populated during data ingestion
+
 2. **Sorting Behavior**: The 0.62 mph values represented legitimate heavily congested traffic (158 records, 0.3% of dataset)
 
 **Solution**:
+
 - Fixed data ingestion script to properly populate temporal fields
+
 - Re-ingested complete dataset (1.2M+ speed records)
+
 - Validated final data distribution: 6,037 unique speeds ranging 0.62-121.79 mph
 
 **Technical Impact**:
+
 - Ensured data temporal accuracy for time-based aggregations
+
 - Confirmed realistic traffic speed distribution patterns
+
 - Validated API integrity with proper varied speed data
 
 #### **Key Technical Insights**
@@ -972,13 +1007,17 @@ During development, I encountered and resolved three critical technical challeng
 #### **Professional Development Impact**
 
 These challenges demonstrated:
-- ✅ **Advanced Debugging**: Systematic approach to complex technical issues
-- ✅ **Data Engineering Expertise**: Comprehensive data validation and integrity checking
-- ✅ **API Development Proficiency**: End-to-end troubleshooting of RESTful services
-- ✅ **Documentation Research**: Thorough investigation of third-party library limitations
-- ✅ **Statistical Analysis**: Applied data science techniques to validate business logic
-- ✅ **Problem-Solving Methodology**: Structured approach to identifying root causes
 
-The resolution of these challenges required significant technical depth and showcased the importance of thorough data engineering validation in production systems.
+- ✅ **Advanced Debugging**: Systematic approach to complex technical issues
+
+- ✅ **Data Engineering Expertise**: Comprehensive data validation and integrity checking
+
+- ✅ **API Development Proficiency**: End-to-end troubleshooting of RESTful services
+
+- ✅ **Documentation Research**: Thorough investigation of third-party library limitations
+
+- ✅ **Statistical Analysis**: Applied data science techniques to validate business logic
+
+- ✅ **Problem-Solving Methodology**: Structured approach to identifying root causes
 
 ---
