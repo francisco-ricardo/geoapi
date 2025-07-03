@@ -13,6 +13,7 @@
 [![API Docs](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D.svg?style=flat-square&logo=swagger&logoColor=white)](http://localhost:8000/docs)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean-blue.svg?style=flat-square)](#project-structure)
 [![Big Data](https://img.shields.io/badge/Big%20Data-1.2M%2B%20Records-red.svg?style=flat-square)](#performance-optimization-big-data-ingestion)
+[![Production Ready](https://img.shields.io/badge/Status-MVP%20Complete-success.svg?style=flat-square&logo=checkmarx&logoColor=white)](#future-work)
 
 A robust geospatial REST API built with **FastAPI**, **SQLAlchemy**, **PostgreSQL/PostGIS**, and **Pydantic** for traffic data analysis and visualization.
 
@@ -566,7 +567,6 @@ The project includes a **Jupyter Notebook** demonstrating real-world API usage w
 [![Performance](https://img.shields.io/badge/Performance-Enterprise%20Scale-green.svg?style=flat-square&logo=speedtest&logoColor=white)](#performance-optimization)
 [![Scalability](https://img.shields.io/badge/Scalability-Cloud%20Native-blue.svg?style=flat-square&logo=kubernetes&logoColor=white)](#horizontal-scaling)
 [![Roadmap](https://img.shields.io/badge/Roadmap-Production%20Features-blue.svg?style=flat-square&logo=roadmap&logoColor=white)](#production-roadmap)
-[![Production Ready](https://img.shields.io/badge/Status-MVP%20Complete-success.svg?style=flat-square&logo=checkmarx&logoColor=white)](#future-work)
 
 This project represents a **comprehensive MVP** demonstrating advanced data engineering and API development capabilities. The following enhancements would be prioritized for production deployment:
 
